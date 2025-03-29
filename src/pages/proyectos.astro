@@ -1,0 +1,189 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Nuestros Proyectos">
+  <section class="w-full py-12 md:py-24 lg:py-32">
+    <div class="container px-4 md:px-6">
+      <div class="flex flex-col items-center justify-center space-y-4 text-center">
+        <div class="space-y-2">
+          <h1 class="text-3xl font-bold tracking-tighter sm:text-5xl">Nuestros Proyectos</h1>
+          <p class="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            Explore nuestra cartera de proyectos completados y en curso.
+          </p>
+        </div>
+      </div>
+      <div class="grid gap-6 py-12 md:grid-cols-2 lg:grid-cols-3">
+        <div class="group relative overflow-hidden rounded-lg border">
+          <img
+            src="/placeholder.svg?height=400&width=600"
+            width="600"
+            height="400"
+            alt="Proyecto 1"
+            class="aspect-video object-cover transition-transform group-hover:scale-105"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
+            <h3 class="font-bold">Puente Central</h3>
+            <p class="text-sm">Diseño y construcción de puente urbano</p>
+          </div>
+        </div>
+        <div class="group relative overflow-hidden rounded-lg border">
+          <img
+            src="/placeholder.svg?height=400&width=600"
+            width="600"
+            height="400"
+            alt="Proyecto 2"
+            class="aspect-video object-cover transition-transform group-hover:scale-105"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
+            <h3 class="font-bold">Edificio Corporativo</h3>
+            <p class="text-sm">Diseño estructural para edificio de oficinas</p>
+          </div>
+        </div>
+        <div class="group relative overflow-hidden rounded-lg border">
+          <img
+            src="/placeholder.svg?height=400&width=600"
+            width="600"
+            height="400"
+            alt="Proyecto 3"
+            class="aspect-video object-cover transition-transform group-hover:scale-105"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
+            <h3 class="font-bold">Sistema de Drenaje</h3>
+            <p class="text-sm">Diseño e implementación de sistema de drenaje urbano</p>
+          </div>
+        </div>
+        <div class="group relative overflow-hidden rounded-lg border">
+          <img
+            src="/placeholder.svg?height=400&width=600"
+            width="600"
+            height="400"
+            alt="Proyecto 4"
+            class="aspect-video object-cover transition-transform group-hover:scale-105"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
+            <h3 class="font-bold">Complejo Residencial</h3>
+            <p class="text-sm">Diseño estructural para complejo de apartamentos</p>
+          </div>
+        </div>
+        <div class="group relative overflow-hidden rounded-lg border">
+          <img
+            src="/placeholder.svg?height=400&width=600"
+            width="600"
+            height="400"
+            alt="Proyecto 5"
+            class="aspect-video object-cover transition-transform group-hover:scale-105"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
+            <h3 class="font-bold">Carretera Regional</h3>
+            <p class="text-sm">Diseño y supervisión de construcción de carretera</p>
+          </div>
+        </div>
+        <div class="group relative overflow-hidden rounded-lg border">
+          <img
+            src="/placeholder.svg?height=400&width=600"
+            width="600"
+            height="400"
+            alt="Proyecto 6"
+            class="aspect-video object-cover transition-transform group-hover:scale-105"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
+            <h3 class="font-bold">Planta de Tratamiento</h3>
+            <p class="text-sm">Diseño de planta de tratamiento de aguas residuales</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="w-full py-12 md:py-24 lg:py-32 bg-muted">
+    <div class="container px-4 md:px-6">
+      <div class="flex flex-col items-center justify-center space-y-4 text-center">
+        <div class="space-y-2">
+          <h2 class="text-3xl font-bold tracking-tighter sm:text-4xl">Categorías de Proyectos</h2>
+          <p class="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            Explore nuestros proyectos por categoría.
+          </p>
+        </div>
+      </div>
+      <div class="grid gap-6 py-12 md:grid-cols-2 lg:grid-cols-4">
+        <a href="/proyectos/categoria/estructuras" class="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm hover:bg-accent">
+          <div class="rounded-full bg-primary/10 p-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-primary">
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <path d="M3 9h18" />
+              <path d="M9 21V9" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold">Estructuras</h3>
+          <p class="text-center text-sm text-muted-foreground">
+            Edificios, puentes y otras estructuras.
+          </p>
+        </a>
+        <a href="/proyectos/categoria/vias" class="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm hover:bg-accent">
+          <div class="rounded-full bg-primary/10 p-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-primary">
+              <path d="M4 19h16" />
+              <path d="M4 15h16" />
+              <path d="M4 11h16" />
+              <path d="M4 7h16" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold">Vías y Carreteras</h3>
+          <p class="text-center text-sm text-muted-foreground">
+            Carreteras, caminos y vías urbanas.
+          </p>
+        </a>
+        <a href="/proyectos/categoria/hidraulica" class="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm hover:bg-accent">
+          <div class="rounded-full bg-primary/10 p-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-primary">
+              <path d="M20.5 10c-.5-4.5-4-8-8.5-8s-8 3.5-8.5 8c-.5 4.5 2.5 8 6 8.5h5c3.5-.5 6.5-4 6-8.5Z" />
+              <path d="M12 12v6" />
+              <path d="M12 12a4 4 0 0 1-4-4" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold">Hidráulica</h3>
+          <p class="text-center text-sm text-muted-foreground">
+            Sistemas de agua, drenaje y tratamiento.
+          </p>
+        </a>
+        <a href="/proyectos/categoria/urbanismo" class="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm hover:bg-accent">
+          <div class="rounded-full bg-primary/10 p-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-primary">
+              <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
+              <path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4" />
+              <path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold">Urbanismo</h3>
+          <p class="text-center text-sm text-muted-foreground">
+            Planificación urbana y desarrollo.
+          </p>
+        </a>
+      </div>
+    </div>
+  </section>
+  <section class="w-full py-12 md:py-24 lg:py-32">
+    <div class="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
+      <div class="space-y-3">
+        <h2 class="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+          ¿Tiene un proyecto en mente?
+        </h2>
+        <p class="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed">
+          Contáctenos para discutir cómo podemos ayudarle a hacer realidad su proyecto.
+        </p>
+      </div>
+      <div class="mx-auto flex flex-col gap-2 min-[400px]:flex-row">
+        <a href="/contacto" class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+          Contactar Ahora
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
+

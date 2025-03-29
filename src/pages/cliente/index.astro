@@ -1,0 +1,70 @@
+---
+import ClienteLayout from '../../layouts/ClienteLayout.astro';
+import { getPlanosByUserId } from '../../lib/db.js';
+
+// Obtener los planos del cliente (usando ID 2 como ejemplo, en producción usarías el ID del usuario autenticado)
+let planos = [];
+try {
+  const result = await getPlanosByUserId(2); // ID del cliente de ejemplo
+  planos = result;
+} catch (error) {
+  console.error("Error al obtener planos:", error);
+}
+---
+
+<ClienteLayout title="Mis Planos" activeLink="planos">
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-2">
+    <h1 class="text-2xl font-bold tracking-tight">Mis Planos</h1>
+    <p class="text-muted-foreground">
+      Acceda a todos los planos compartidos por el ingeniero.
+    </p>
+  </div>
+  <div class="rounded-lg border shadow-sm">
+    <div class="p-4">
+      {planos.length === 0 ? (
+        <div class="text-center py-8">
+          <p class="text-muted-foreground">No hay planos disponibles para mostrar.</p>
+        </div>
+      ) : (
+        <div class="relative w-full overflow-auto">
+          <table class="w-full caption-bottom text-sm">
+            <thead class="[&_tr]:border-b">
+              <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Nombre</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Tipo</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Fecha</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Acción</th>
+              </tr>
+            </thead>
+            <tbody class="[&_tr:last-child]:border-0">
+              {planos.map((plano) => (
+                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                  <td class="p-4 align-middle">{plano.nombre}</td>
+                  <td class="p-4 align-middle">{plano.tipo}</td>
+                  <td class="p-4 align-middle">{new Date(plano.fecha_subida).toLocaleDateString()}</td>
+                  <td class="p-4 align-middle">
+                    <a 
+                      href={plano.archivo_url}
+                      target="_blank"
+                      class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      Descargar
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+</ClienteLayout>
+

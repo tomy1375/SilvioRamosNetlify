@@ -1,0 +1,21 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LoginForm from '../components/LoginForm';
+---
+
+<Layout title="Acceso Clientes">
+  <main class="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center py-12">
+    <div class="bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl p-12 max-w-md w-full space-y-8">
+      <div class="text-center space-y-4">
+        <h1 class="text-4xl font-bold tracking-tight mb-4">Acceso Clientes</h1>
+        <p class="text-muted-foreground/80 text-lg ">
+          Ingrese sus credenciales para acceder a su cuenta
+        </p>
+      </div>
+      <div>
+
+        <LoginForm client:load />
+      </div>
+    </div>
+  </main>
+</Layout>
