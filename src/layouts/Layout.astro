@@ -39,19 +39,19 @@ const { title } = Astro.props;
           <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"></path>
           <path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"></path>
         </svg>
-        <span>IngeCivil</span>
+        <span>S.M.R.</span>
       </a>
       <nav class="hidden md:flex gap-6">
-        <a href="/" class="text-sm font-medium hover:underline underline-offset-4">
+        <a href="/" class="nav-link text-sm font-medium">
           Inicio
         </a>
-        <a href="/equipo" class="text-sm font-medium hover:underline underline-offset-4">
+        <a href="/equipo" class="nav-link text-sm font-medium">
           Equipo
         </a>
-        <a href="/proyectos" class="text-sm font-medium hover:underline underline-offset-4">
+        <a href="/proyectos" class="nav-link text-sm font-medium">
           Proyectos
         </a>
-        <a href="/contacto" class="text-sm font-medium hover:underline underline-offset-4">
+        <a href="/contacto" class="nav-link text-sm font-medium">
           Contacto
         </a>
       </nav>
@@ -222,4 +222,38 @@ const { title } = Astro.props;
   </footer>
 </body>
 </html>
+
+<style>
+  .nav-link {
+    position: relative;
+    transition: 0.5s ease;
+    padding: 0.2em 0.4em;
+  }
+
+  .nav-link::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 100%; 
+    background-color: #3b82f6; /* Blue color */
+    transition: 0.5s ease;
+    transform: scaleX(0); 
+  }
+
+  .nav-link:hover {
+    color: #3b82f6; /* Blue color */
+    transition-delay: 0.1s;
+  }
+
+  .nav-link:hover::before {
+    transform: scaleX(1); 
+  }
+
+  nav:hover .nav-link:not(:hover) {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+  }
+</style>
 
