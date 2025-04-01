@@ -120,17 +120,25 @@ export async function getPlanos() {
   return result.rows
 }
 
+// Función para obtener un plano por su ID
 export async function getPlanoById(id) {
-  const result = await query(
-    `
-    SELECT p.*, u.nombre as cliente_nombre 
-    FROM planos p
-    LEFT JOIN usuarios u ON p.usuario_id = u.id
-    WHERE p.id = $1
-  `,
-    [id],
-  )
-  return result.rows[0]
+  console.log(`Buscando plano con ID: ${id}`)
+  try {
+    const result = await query(
+      `
+      SELECT p.*, u.nombre as cliente_nombre 
+      FROM planos p
+      LEFT JOIN usuarios u ON p.usuario_id = u.id
+      WHERE p.id = $1
+    `,
+      [id],
+    )
+    console.log(`Resultado de getPlanoById: ${JSON.stringify(result.rows[0] || null)}`)
+    return result.rows[0]
+  } catch (error) {
+    console.error(`Error en getPlanoById: ${error}`)
+    throw error
+  }
 }
 
 // También modificar la función para obtener los planos por usuario

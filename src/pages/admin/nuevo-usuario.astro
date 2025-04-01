@@ -1,0 +1,206 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Nuevo Usuario" activeLink="usuarios">
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-2">
+    <h1 class="text-2xl font-bold tracking-tight">Nuevo Usuario</h1>
+    <p class="text-muted-foreground">
+      Cree un nuevo usuario en el sistema.
+    </p>
+  </div>
+
+  <div class="rounded-lg border shadow-sm">
+    <div class="p-6">
+      <form id="nuevoUsuarioForm" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label for="nombre" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nombre</label>
+            <input
+              type="text"
+              id="nombre"
+              name="nombre"
+              required
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+          
+          <div class="space-y-2">
+            <label for="email" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+          
+          <div class="space-y-2">
+            <label for="tipo" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Tipo de Usuario</label>
+            <select
+              id="tipo"
+              name="tipo"
+              required
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="admin">Administrador</option>
+              <option value="cliente" selected>Cliente</option>
+            </select>
+          </div>
+          
+          <div class="space-y-2">
+            <label for="telefono" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Teléfono</label>
+            <input
+              type="tel"
+              id="telefono"
+              name="telefono"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+          
+          <div class="space-y-2">
+            <label for="empresa" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Empresa</label>
+            <input
+              type="text"
+              id="empresa"
+              name="empresa"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+          
+          <div class="space-y-2">
+            <label for="password" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+          
+          <div class="space-y-2">
+            <label for="confirmPassword" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Confirmar Contraseña</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              required
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-4">
+          <a 
+            href="/admin/usuarios" 
+            class="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            Cancelar
+          </a>
+          <button 
+            type="button" 
+            id="crearUsuario"
+            class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            Crear Usuario
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</AdminLayout>
+
+<script is:inline>
+  // Función para crear un nuevo usuario
+  function crearNuevoUsuario() {
+    console.log('Creando nuevo usuario...');
+    
+    // Obtener el formulario
+    const form = document.getElementById('nuevoUsuarioForm');
+    
+    if (form) {
+      // Obtener los datos del formulario
+      const formData = new FormData(form);
+      
+      const nombre = formData.get('nombre');
+      const email = formData.get('email');
+      const tipo = formData.get('tipo');
+      const telefono = formData.get('telefono');
+      const empresa = formData.get('empresa');
+      const password = formData.get('password');
+      const confirmPassword = formData.get('confirmPassword');
+      
+      // Validar que las contraseñas coincidan
+      if (password !== confirmPassword) {
+        alert('Las contraseñas no coinciden');
+        return;
+      }
+      
+      // Crear el objeto de datos a enviar
+      const userData = {
+        nombre,
+        email,
+        tipo,
+        telefono: telefono || null,
+        empresa: empresa || null,
+        password,
+      };
+      
+      // Mostrar los datos que se van a enviar (para depuración)
+      console.log('Enviando datos:', { ...userData, password: '******' });
+      
+      // Enviar los datos al servidor
+      fetch('/api/crear-usuario', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+      .then(response => {
+        console.log('Respuesta recibida:', response);
+        return response.json();
+      })
+      .then(data => {
+        console.log('Datos recibidos:', data);
+        if (data.success) {
+          alert('Usuario creado correctamente');
+          window.location.href = '/admin/usuarios';
+        } else {
+          alert(`Error: ${data.error || 'No se pudo crear el usuario'}`);
+        }
+      })
+      .catch(error => {
+        console.error('Error al crear el usuario:', error);
+        alert('Error al crear el usuario. Por favor, inténtelo de nuevo.');
+      });
+    } else {
+      console.error('Formulario no encontrado');
+    }
+  }
+  
+  // Asignar el evento al botón inmediatamente
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM cargado, inicializando eventos...');
+    
+    const crearBtn = document.getElementById('crearUsuario');
+    if (crearBtn) {
+      console.log('Botón de crear encontrado, agregando evento click');
+      crearBtn.addEventListener('click', crearNuevoUsuario);
+    } else {
+      console.error('Botón de crear no encontrado');
+    }
+  });
+  
+  // También asignar el evento inmediatamente por si el DOM ya está cargado
+  const crearBtn = document.getElementById('crearUsuario');
+  if (crearBtn) {
+    console.log('Botón de crear encontrado (fuera de DOMContentLoaded), agregando evento click');
+    crearBtn.addEventListener('click', crearNuevoUsuario);
+  }
+</script>
+

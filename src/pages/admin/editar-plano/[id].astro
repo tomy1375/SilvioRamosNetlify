@@ -1,151 +1,165 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { getUserById, getUsers } from '../../../lib/db.js';
+import { getPlanoById, getUsers } from '../../../lib/db.js';
 
-// Obtener el ID del usuario de los parámetros de la URL
+// Obtener el ID del plano de los parámetros de la URL
 const { id } = Astro.params;
 
-// Obtener información del usuario
-let usuario = null;
+// Obtener información del plano
+let plano = null;
 let error = null;
+let usuarios = [];
 
 try {
+  console.log("Intentando obtener plano con ID:", id);
+  
   if (id) {
-    usuario = await getUserById(parseInt(id));
-    if (!usuario) {
-      error = "Usuario no encontrado";
+    plano = await getPlanoById(parseInt(id));
+    console.log("Resultado de getPlanoById:", plano);
+    
+    if (!plano) {
+      error = "Plano no encontrado";
     }
   } else {
-    error = "ID de usuario no proporcionado";
+    error = "ID de plano no proporcionado";
   }
+
+  // Obtener la lista de usuarios (clientes)
+  usuarios = await getUsers();
+  console.log(`Se encontraron ${usuarios.length} usuarios`);
+  
+  // Filtrar solo los usuarios de tipo "cliente"
+  usuarios = usuarios.filter((usuario: any) => 
+    usuario.tipo && usuario.tipo.toLowerCase() === 'cliente'
+  );
+  console.log(`Después de filtrar, quedan ${usuarios.length} clientes`);
+  
 } catch (e) {
-  console.error("Error al obtener datos del usuario:", e);
-  error = "Error al cargar los datos del usuario";
+  console.error("Error al obtener datos:", e);
+  error = "Error al cargar los datos";
 }
 ---
 
-<AdminLayout title="Editar Usuario" activeLink="usuarios">
-  <div class="flex flex-col gap-6">
-    <div class="flex flex-col gap-2">
-      <h1 class="text-2xl font-bold tracking-tight">Editar Usuario</h1>
-      <p class="text-muted-foreground">
-        Modifique los detalles del usuario seleccionado.
-      </p>
-    </div>
-
-    {error && (
-      <div class="bg-destructive/15 text-destructive p-4 rounded-md">
-        <p>{error}</p>
-        <a href="/admin/usuarios" class="text-primary hover:underline mt-2 inline-block">Volver a la lista de usuarios</a>
-      </div>
-    )}
-
-    {usuario && (
-      <div class="rounded-lg border shadow-sm">
-        <div class="p-6">
-          <form id="editarUsuarioForm" class="space-y-6">
-            <input type="hidden" name="id" value={usuario.id} />
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="space-y-2">
-                <label for="nombre" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nombre</label>
-                <input
-                  type="text"
-                  id="nombre"
-                  name="nombre"
-                  value={usuario.nombre}
-                  required
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-              </div>
-              
-              <div class="space-y-2">
-                <label for="email" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={usuario.email}
-                  required
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-              </div>
-              
-              <div class="space-y-2">
-                <label for="tipo" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Tipo de Usuario</label>
-                <select
-                  id="tipo"
-                  name="tipo"
-                  required
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="admin" selected={usuario.tipo === 'admin' || usuario.tipo === 'Admin'}>Administrador</option>
-                  <option value="cliente" selected={usuario.tipo === 'cliente' || usuario.tipo === 'Cliente'}>Cliente</option>
-                </select>
-              </div>
-              
-              <div class="space-y-2">
-                <label for="telefono" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Teléfono</label>
-                <input
-                  type="tel"
-                  id="telefono"
-                  name="telefono"
-                  value={usuario.telefono || ''}
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-              </div>
-              
-              <div class="space-y-2">
-                <label for="empresa" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Empresa</label>
-                <input
-                  type="text"
-                  id="empresa"
-                  name="empresa"
-                  value={usuario.empresa || ''}
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-              </div>
-              
-              <div class="space-y-2">
-                <label for="password" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nueva Contraseña (dejar en blanco para mantener la actual)</label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-              </div>
-            </div>
-            
-            <div class="flex justify-end gap-4">
-              <a 
-                href="/admin/usuarios" 
-                class="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-              >
-                Cancelar
-              </a>
-              <button 
-                type="button" 
-                id="guardarCambios"
-                class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-              >
-                Guardar Cambios
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    )}
+<AdminLayout title="Editar Plano" activeLink="planos">
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-2">
+    <h1 class="text-2xl font-bold tracking-tight">Editar Plano</h1>
+    <p class="text-muted-foreground">
+      Modifique los detalles del plano seleccionado.
+    </p>
   </div>
+
+  {error && (
+    <div class="bg-destructive/15 text-destructive p-4 rounded-md">
+      <p>{error}</p>
+      <a href="/admin/planos" class="text-primary hover:underline mt-2 inline-block">Volver a la lista de planos</a>
+    </div>
+  )}
+
+  {plano && (
+    <div class="rounded-lg border shadow-sm">
+      <div class="p-6">
+        <form id="editarPlanoForm" class="space-y-6">
+          <input type="hidden" name="id" value={plano.id} />
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label for="nombre" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nombre del Plano</label>
+              <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                value={plano.nombre}
+                required
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+            
+            <div class="space-y-2">
+              <label for="tipo" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Tipo de Plano</label>
+              <select
+                id="tipo"
+                name="tipo"
+                required
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="Arquitectónico" selected={plano.tipo === 'Arquitectónico'}>Arquitectónico</option>
+                <option value="Estructural" selected={plano.tipo === 'Estructural'}>Estructural</option>
+                <option value="Eléctrico" selected={plano.tipo === 'Eléctrico'}>Eléctrico</option>
+                <option value="Hidráulico" selected={plano.tipo === 'Hidráulico'}>Hidráulico</option>
+                <option value="Sanitario" selected={plano.tipo === 'Sanitario'}>Sanitario</option>
+                <option value="Otro" selected={plano.tipo === 'Otro'}>Otro</option>
+              </select>
+            </div>
+            
+            <div class="space-y-2">
+              <label for="cliente" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Cliente</label>
+              <select
+                id="cliente"
+                name="cliente"
+                required
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {usuarios.map((usuario: any) => (
+                  <option value={usuario.id} selected={usuario.id === plano.usuario_id}>{usuario.nombre}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Archivo Actual</label>
+              <div class="flex items-center gap-2">
+                <a 
+                  href={plano.archivo_url} 
+                  target="_blank" 
+                  class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                >
+                  Ver archivo actual
+                </a>
+                <span class="text-sm text-muted-foreground">(No se puede cambiar el archivo)</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="space-y-2">
+            <label for="descripcion" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Descripción</label>
+            <textarea
+              id="descripcion"
+              name="descripcion"
+              rows="4"
+              class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >{plano.descripcion}</textarea>
+          </div>
+          
+          <div class="flex justify-end gap-4">
+            <a 
+              href="/admin/planos" 
+              class="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            >
+              Cancelar
+            </a>
+            <button 
+              type="button" 
+              id="guardarCambios"
+              class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            >
+              Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )}
+</div>
 </AdminLayout>
 
 <script is:inline>
-  // Función para guardar los cambios del usuario
-  function guardarCambiosUsuario() {
-    console.log('Guardando cambios del usuario...');
+  // Función para guardar los cambios del plano
+  function guardarCambiosPlano() {
+    console.log('Guardando cambios del plano...');
     
     // Obtener el formulario
-    const form = document.getElementById('editarUsuarioForm');
+    const form = document.getElementById('editarPlanoForm');
     
     if (form) {
       // Obtener los datos del formulario
@@ -153,37 +167,26 @@ try {
       
       const id = formData.get('id');
       const nombre = formData.get('nombre');
-      const email = formData.get('email');
       const tipo = formData.get('tipo');
-      const telefono = formData.get('telefono');
-      const empresa = formData.get('empresa');
-      const password = formData.get('password');
-      
-      // Crear el objeto de datos a enviar
-      const userData = {
-        id,
-        nombre,
-        email,
-        tipo,
-        telefono: telefono || null,
-        empresa: empresa || null,
-      };
-      
-      // Añadir la contraseña solo si se ha proporcionado una nueva
-      if (password && password.trim() !== '') {
-        userData.password = password;
-      }
+      const cliente = formData.get('cliente');
+      const descripcion = formData.get('descripcion');
       
       // Mostrar los datos que se van a enviar (para depuración)
-      console.log('Enviando datos:', userData);
+      console.log('Enviando datos:', { id, nombre, tipo, usuario_id: cliente, descripcion });
       
       // Enviar los datos al servidor
-      fetch('/api/actualizar-usuario', {
+      fetch('/api/actualizar-plano', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({
+          id,
+          nombre,
+          tipo,
+          usuario_id: cliente,
+          descripcion,
+        }),
       })
       .then(response => {
         console.log('Respuesta recibida:', response);
@@ -192,38 +195,39 @@ try {
       .then(data => {
         console.log('Datos recibidos:', data);
         if (data.success) {
-          alert('Usuario actualizado correctamente');
-          window.location.href = '/admin/usuarios';
+          alert('Plano actualizado correctamente');
+          window.location.href = '/admin/planos';
         } else {
-          alert(`Error: ${data.error || 'No se pudo actualizar el usuario'}`);
+          alert(`Error: ${data.error || 'No se pudo actualizar el plano'}`);
         }
       })
       .catch(error => {
-        console.error('Error al actualizar el usuario:', error);
-        alert('Error al actualizar el usuario. Por favor, inténtelo de nuevo.');
+        console.error('Error al actualizar el plano:', error);
+        alert('Error al actualizar el plano. Por favor, inténtelo de nuevo.');
       });
     } else {
       console.error('Formulario no encontrado');
     }
   }
   
-  // Esperar a que el DOM esté completamente cargado
-  document.addEventListener('DOMContentLoaded', () => {
+  // Asignar el evento al botón inmediatamente
+  document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM cargado, inicializando eventos...');
     
-    // Obtener el botón
     const guardarBtn = document.getElementById('guardarCambios');
-    
     if (guardarBtn) {
       console.log('Botón de guardar encontrado, agregando evento click');
-      
-      guardarBtn.addEventListener('click', () => {
-        console.log('Botón de guardar clickeado');
-        guardarCambiosUsuario();
-      });
+      guardarBtn.addEventListener('click', guardarCambiosPlano);
     } else {
       console.error('Botón de guardar no encontrado');
     }
   });
+  
+  // También asignar el evento inmediatamente por si el DOM ya está cargado
+  const guardarBtn = document.getElementById('guardarCambios');
+  if (guardarBtn) {
+    console.log('Botón de guardar encontrado (fuera de DOMContentLoaded), agregando evento click');
+    guardarBtn.addEventListener('click', guardarCambiosPlano);
+  }
 </script>
 

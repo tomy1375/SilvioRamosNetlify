@@ -4,18 +4,80 @@ import LoginForm from '../components/LoginForm';
 ---
 
 <Layout title="Acceso Clientes">
-  <main class="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center py-12">
-    <div class="bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl p-12 max-w-md w-full space-y-8">
+  <main id="login-container" class="min-h-screen flex items-center justify-center py-12">
+    <div id="login-box" class="backdrop-blur-sm shadow-xl rounded-2xl p-12 max-w-md w-full space-y-8">
       <div class="text-center space-y-4">
-        <h1 class="text-4xl font-bold tracking-tight mb-4">Acceso Clientes</h1>
-        <p class="text-muted-foreground/80 text-lg ">
+        <h1 id="login-title" class="text-4xl font-bold tracking-tight mb-4">Acceso Clientes</h1>
+        <p id="login-subtitle" class="text-lg">
           Ingrese sus credenciales para acceder a su cuenta
         </p>
       </div>
       <div>
-
-        <LoginForm client:load />
+        <LoginForm client:only="react" />
       </div>
     </div>
   </main>
 </Layout>
+
+<script>
+  // Función para actualizar los estilos según el tema
+  function updateLoginStyles() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const container = document.getElementById('login-container');
+    const box = document.getElementById('login-box');
+    const title = document.getElementById('login-title');
+    const subtitle = document.getElementById('login-subtitle');
+    
+    if (container) {
+      container.style.background = isDark 
+        ? 'linear-gradient(to bottom right, rgb(15, 23, 42), rgb(30, 41, 59))' 
+        : 'linear-gradient(to bottom right, rgb(239, 246, 255), rgb(219, 234, 254))';
+    }
+    
+    if (box) {
+      box.style.backgroundColor = isDark 
+        ? 'rgba(30, 41, 59, 0.95)' 
+        : 'rgba(255, 255, 255, 0.95)';
+    }
+    
+    if (title) {
+      title.style.color = isDark ? 'white' : 'rgb(17, 24, 39)';
+    }
+    
+    if (subtitle) {
+      subtitle.style.color = isDark ? 'rgb(209, 213, 219)' : 'rgb(75, 85, 99)';
+    }
+  }
+  
+  // Ejecutar al cargar la página
+  document.addEventListener('DOMContentLoaded', updateLoginStyles);
+  
+  // Observar cambios en la clase 'dark' del elemento html
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'class') {
+        updateLoginStyles();
+      }
+    });
+  });
+  
+  observer.observe(document.documentElement, { attributes: true });
+  
+  // También ejecutar cuando se navega entre páginas con ViewTransitions
+  document.addEventListener('astro:page-load', updateLoginStyles);
+</script>
+
+<style>
+  /* Estilos base que serán sobrescritos por JavaScript */
+  #login-container {
+    transition: background 0.3s ease;
+  }
+  
+  #login-box {
+    transition: background-color 0.3s ease;
+  }
+  
+  #login-title, #login-subtitle {
+    transition: color 0.3s ease;
+  }
+</style>

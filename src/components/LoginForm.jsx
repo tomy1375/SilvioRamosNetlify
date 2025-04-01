@@ -1,12 +1,40 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export default function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  // Detectar cambios en el tema de Astro
+  useEffect(() => {
+    // Función para verificar el tema actual
+    const checkTheme = () => {
+      const isDark = document.documentElement.classList.contains("dark")
+      setIsDarkMode(isDark)
+    }
+
+    // Verificar el tema inicial
+    checkTheme()
+
+    // Crear un observador para detectar cambios en la clase 'dark'
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "class") {
+          checkTheme()
+        }
+      })
+    })
+
+    // Iniciar la observación del elemento html
+    observer.observe(document.documentElement, { attributes: true })
+
+    // Limpiar el observador cuando el componente se desmonte
+    return () => observer.disconnect()
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -31,6 +59,29 @@ export default function LoginForm() {
     }
   }
 
+  // Estilos para modo oscuro/claro
+  const inputStyle = {
+    backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
+    color: isDarkMode ? "white" : "rgb(31, 41, 55)",
+    borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+    transition: "background-color 0.3s, color 0.3s, border-color 0.3s",
+  }
+
+  const labelStyle = {
+    color: isDarkMode ? "rgb(229, 231, 235)" : "rgb(31, 41, 55)",
+    transition: "color 0.3s",
+  }
+
+  const linkStyle = {
+    color: isDarkMode ? "rgb(96, 165, 250)" : "rgb(59, 130, 246)",
+    transition: "color 0.3s",
+  }
+
+  const textStyle = {
+    color: isDarkMode ? "rgb(209, 213, 219)" : "rgb(75, 85, 99)",
+    transition: "color 0.3s",
+  }
+
   return (
     <div className="space-y-4">
       {error && <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">{error}</div>}
@@ -39,13 +90,15 @@ export default function LoginForm() {
           <label
             htmlFor="email"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            style={labelStyle}
           >
             Correo Electrónico
           </label>
           <input
             id="email"
             type="email"
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full rounded-md border px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            style={inputStyle}
             placeholder="nombre@ejemplo.com"
             required
             value={email}
@@ -57,17 +110,19 @@ export default function LoginForm() {
             <label
               htmlFor="password"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              style={labelStyle}
             >
               Contraseña
             </label>
-            <a href="/recuperar-contrasena" className="text-sm text-primary hover:underline">
+            <a href="/recuperar-contrasena" className="text-sm hover:underline" style={linkStyle}>
               ¿Olvidó su contraseña?
             </a>
           </div>
           <input
             id="password"
             type="password"
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full rounded-md border px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            style={inputStyle}
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -81,9 +136,9 @@ export default function LoginForm() {
           {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
         </button>
       </form>
-      <div className="text-center text-sm">
+      <div className="text-center text-sm" style={textStyle}>
         ¿No tiene una cuenta?{" "}
-        <a href="/contacto" className="text-primary hover:underline">
+        <a href="/contacto" className="hover:underline" style={linkStyle}>
           Contacte al administrador
         </a>
       </div>

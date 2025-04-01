@@ -10,7 +10,7 @@ try {
   console.log(`Se encontraron ${result.length} usuarios en la base de datos`);
   console.log("Usuarios encontrados:", JSON.stringify(result));
   usuarios = result;
-  
+
   // Verificar que los usuarios se están asignando correctamente
   console.log("Usuarios asignados a la variable:", usuarios.length);
   console.log("Primer usuario:", usuarios.length > 0 ? JSON.stringify(usuarios[0]) : "No hay usuarios");
@@ -78,7 +78,6 @@ try {
                         class="eliminar-usuario inline-flex h-9 items-center justify-center rounded-md bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground shadow-sm hover:bg-destructive/90"
                         data-id={usuario.id}
                         data-nombre={usuario.nombre}
-                        onclick={`mostrarModalEliminarUsuario('${usuario.id}', '${usuario.nombre}')`}
                       >
                         Eliminar
                       </button>
@@ -111,7 +110,7 @@ try {
 </div>
 </AdminLayout>
 
-<script is:inline>
+<script>
   // Variable global para almacenar el ID del usuario a eliminar
   let usuarioIdAEliminar = null;
   
@@ -173,57 +172,53 @@ try {
     });
   }
   
-  // Esperar a que el DOM esté completamente cargado
+  // Inicializar eventos cuando el DOM esté cargado
   document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM cargado, inicializando eventos de usuarios...');
     
-    // Agregar evento click al botón de cancelar
+    // Configurar eventos para los botones de eliminar
+    document.querySelectorAll('.eliminar-usuario').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const nombre = btn.getAttribute('data-nombre');
+        mostrarModalEliminarUsuario(id, nombre);
+      });
+    });
+    
+    // Configurar evento para el botón de cancelar eliminación
     const cancelarEliminar = document.getElementById('cancelarEliminar');
     if (cancelarEliminar) {
       cancelarEliminar.addEventListener('click', () => {
         console.log('Cancelar eliminación de usuario');
-        
-        // Ocultar el modal
         const eliminarModal = document.getElementById('eliminarModal');
         if (eliminarModal) {
           eliminarModal.classList.add('hidden');
         }
-        // Limpiar el ID del usuario
         usuarioIdAEliminar = null;
       });
     }
     
-    // Agregar evento click al botón de confirmar
+    // Configurar evento para el botón de confirmar eliminación
     const confirmarEliminar = document.getElementById('confirmarEliminar');
     if (confirmarEliminar) {
       confirmarEliminar.addEventListener('click', () => {
         console.log('Confirmar eliminación de usuario');
-        
-        // Verificar si hay un ID de usuario
         if (usuarioIdAEliminar) {
-          // Llamar a la función para eliminar el usuario
           eliminarUsuario(usuarioIdAEliminar);
-        } else {
-          console.error('No hay ID de usuario para eliminar');
         }
       });
     }
     
-    // Agregar evento click al fondo del modal para cerrarlo
+    // Configurar evento para cerrar el modal al hacer clic en el fondo
     const eliminarModal = document.getElementById('eliminarModal');
     if (eliminarModal) {
       eliminarModal.addEventListener('click', (e) => {
         if (e.target === eliminarModal) {
-          console.log('Cerrar modal por clic en fondo');
-          
-          // Ocultar el modal
           eliminarModal.classList.add('hidden');
-          // Limpiar el ID del usuario
           usuarioIdAEliminar = null;
         }
       });
     }
   });
 </script>
-
 
