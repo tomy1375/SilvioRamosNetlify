@@ -2,6 +2,21 @@
 
 import { useState } from "react"
 
+// Definir el tipo de props con TypeScript
+/**
+ * @typedef {Object} Usuario
+ * @property {number} id - ID del usuario
+ * @property {string} nombre - Nombre del usuario
+ * @property {string} tipo - Tipo de usuario
+ * @property {string} email - Email del usuario
+ * @property {string} [empresa] - Empresa del usuario (opcional)
+ * @property {string} [telefono] - Teléfono del usuario (opcional)
+ */
+
+/**
+ * @param {Object} props
+ * @param {Usuario[]} props.usuarios - Lista de usuarios
+ */
 export default function SubirPlanoForm({ usuarios = [] }) {
   const [nombre, setNombre] = useState("")
   const [tipo, setTipo] = useState("Arquitectónico")

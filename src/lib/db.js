@@ -154,6 +154,7 @@ export async function getPlanosByUserId(userId) {
   return result.rows
 }
 
+// Asegurémonos de que la función createPlano esté correctamente exportada
 export async function createPlano(planoData) {
   const { nombre, tipo, descripcion, archivo_url, usuario_id } = planoData
   const result = await query(

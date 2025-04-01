@@ -4,19 +4,19 @@ import SubirPlanoForm from '../../components/SubirPlanoForm.jsx';
 import { getUsers } from '../../lib/db.js';
 
 // Añadir más logs detallados para depurar el problema
-let usuarios = [];
+let usuarios: any[] = [];
 try {
   console.log("Página subir: Obteniendo usuarios...");
   usuarios = await getUsers();
   console.log(`Página subir: Se encontraron ${usuarios.length} usuarios`);
-  console.log("Usuarios antes de filtrar:", JSON.stringify(usuarios.map(u => ({ id: u.id, nombre: u.nombre, tipo: u.tipo }))));
+  console.log("Usuarios antes de filtrar:", JSON.stringify(usuarios.map((u: any) => ({ id: u.id, nombre: u.nombre, tipo: u.tipo }))));
 
   // Filtrar solo los usuarios de tipo "cliente" (considerando mayúsculas y minúsculas)
-  usuarios = usuarios.filter((usuario) => 
+  usuarios = usuarios.filter((usuario: any) => 
     usuario.tipo && (usuario.tipo.toLowerCase() === 'cliente')
   );
   console.log(`Página subir: Después de filtrar, quedan ${usuarios.length} clientes`);
-  console.log("Clientes filtrados:", JSON.stringify(usuarios.map(u => ({ id: u.id, nombre: u.nombre }))));
+  console.log("Clientes filtrados:", JSON.stringify(usuarios.map((u: any) => ({ id: u.id, nombre: u.nombre }))));
 } catch (error) {
   console.error("Error al obtener usuarios:", error);
 }
