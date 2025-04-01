@@ -1,37 +1,55 @@
 "use client"
 
 import { useState } from "react"
-import { useRef } from "react"
 
-export default function SubirPlanoForm() {
+export default function SubirPlanoForm({ usuarios = [] }) {
   const [nombre, setNombre] = useState("")
-  const [tipo, setTipo] = useState("")
+  const [tipo, setTipo] = useState("Arquitectónico")
   const [cliente, setCliente] = useState("")
   const [descripcion, setDescripcion] = useState("")
   const [archivo, setArchivo] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [fileName, setFileName] = useState("")
+  const [fileSize, setFileSize] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-  const fileInputRef = useRef(null)
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setArchivo(file)
+      setFileName(file.name)
+      setFileSize(formatFileSize(file.size))
+    }
+  }
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + " bytes"
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB"
+    else return (bytes / 1048576).toFixed(1) + " MB"
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
+    setIsLoading(true)
     setError("")
     setSuccess("")
 
     try {
-      // Validar que se haya seleccionado un archivo
-      if (!archivo) {
-        throw new Error("Debe seleccionar un archivo PDF")
+      // Validar que se hayan completado todos los campos
+      if (!nombre || !tipo || !cliente || !archivo) {
+        setError("Por favor, complete todos los campos requeridos.")
+        setIsLoading(false)
+        return
       }
 
-      // Validar que sea un PDF
+      // Validar que el archivo sea un PDF
       if (archivo.type !== "application/pdf") {
-        throw new Error("El archivo debe ser un PDF")
+        setError("El archivo debe ser un PDF.")
+        setIsLoading(false)
+        return
       }
 
-      // Crear un FormData para enviar el archivo
       const formData = new FormData()
       formData.append("nombre", nombre)
       formData.append("tipo", tipo)
@@ -39,106 +57,159 @@ export default function SubirPlanoForm() {
       formData.append("descripcion", descripcion)
       formData.append("archivo", archivo)
 
-      // Enviar el archivo al servidor
       const response = await fetch("/api/subir-plano", {
         method: "POST",
         body: formData,
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Error al subir el plano")
+      const data = await response.json()
+
+      if (response.ok) {
+        setSuccess("Plano subido correctamente.")
+        // Limpiar el formulario
+        setNombre("")
+        setTipo("Arquitectónico")
+        setCliente("")
+        setDescripcion("")
+        setArchivo(null)
+        setFileName("")
+        setFileSize("")
+        // Limpiar el input de archivo
+        document.getElementById("archivo").value = ""
+      } else {
+        setError(`Error al subir el plano: ${data.error || "Ocurrió un error desconocido"}`)
+
+        // Si hay una URL de configuración, mostrar un enlace
+        if (data.setupUrl) {
+          setError(
+            `${data.error} <a href="${data.setupUrl}" class="text-primary hover:underline">Configurar base de datos</a>`,
+          )
+        }
       }
-
-      // Mostrar mensaje de éxito
-      setSuccess("Plano subido correctamente")
-
-      // Limpiar el formulario
-      setNombre("")
-      setTipo("")
-      setCliente("")
-      setDescripcion("")
-      setArchivo(null)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ""
-      }
-
-      // Redirigir después de 2 segundos
-      setTimeout(() => {
-        window.location.href = "/admin/planos"
-      }, 2000)
-    } catch (err) {
-      setError(err.message || "Error al subir el plano. Por favor, inténtelo de nuevo.")
+    } catch (error) {
+      console.error("Error al subir el plano:", error)
+      setError("Error al procesar la solicitud. Por favor, inténtelo de nuevo.")
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
-      {error && <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">{error}</div>}
-      {success && <div className="bg-green-100 text-green-800 text-sm p-3 rounded-md">{success}</div>}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div
+          className="bg-destructive/15 text-destructive p-4 rounded-md"
+          dangerouslySetInnerHTML={{ __html: error }}
+        ></div>
+      )}
+      {success && <div className="bg-green-100 text-green-800 p-4 rounded-md">{success}</div>}
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label
             htmlFor="nombre"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            Nombre del Plano
+            Nombre del Plano *
           </label>
           <input
+            type="text"
             id="nombre"
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            placeholder="Ej: Plano Estructural - Edificio A"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
+
         <div className="space-y-2">
           <label
             htmlFor="tipo"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            Tipo de Plano
+            Tipo de Plano *
           </label>
           <select
             id="tipo"
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             value={tipo}
             onChange={(e) => setTipo(e.target.value)}
             required
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value="">Seleccione un tipo</option>
-            <option value="estructural">Estructural</option>
-            <option value="hidraulico">Hidráulico</option>
-            <option value="electrico">Eléctrico</option>
-            <option value="topografico">Topográfico</option>
-            <option value="arquitectonico">Arquitectónico</option>
+            <option value="Arquitectónico">Arquitectónico</option>
+            <option value="Estructural">Estructural</option>
+            <option value="Eléctrico">Eléctrico</option>
+            <option value="Hidráulico">Hidráulico</option>
+            <option value="Sanitario">Sanitario</option>
+            <option value="Otro">Otro</option>
           </select>
         </div>
+
+        <div className="space-y-2">
+          <label
+            htmlFor="cliente"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Cliente *
+          </label>
+          <select
+            id="cliente"
+            value={cliente}
+            onChange={(e) => setCliente(e.target.value)}
+            required
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">Seleccione un cliente</option>
+            {usuarios.length === 0 ? (
+              <option value="" disabled>
+                No hay clientes disponibles
+              </option>
+            ) : (
+              usuarios.map((usuario) => (
+                <option key={usuario.id} value={usuario.id}>
+                  {usuario.nombre} (ID: {usuario.id})
+                </option>
+              ))
+            )}
+          </select>
+          {usuarios.length === 0 && (
+            <p className="text-xs text-red-500 mt-1">No se encontraron clientes. Verifique la base de datos.</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <label
+            htmlFor="archivo"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Archivo PDF *
+          </label>
+          <div className="flex flex-col gap-2">
+            <input
+              type="file"
+              id="archivo"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              required
+              className="hidden"
+            />
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="archivo"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
+              >
+                Seleccionar archivo
+              </label>
+              {fileName && (
+                <span className="text-sm text-muted-foreground">
+                  {fileName} ({fileSize})
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="space-y-2">
-        <label
-          htmlFor="cliente"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          Cliente
-        </label>
-        <select
-          id="cliente"
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          value={cliente}
-          onChange={(e) => setCliente(e.target.value)}
-          required
-        >
-          <option value="">Seleccione un cliente</option>
-          <option value="2">Juan Pérez</option>
-          <option value="3">María López</option>
-          <option value="4">Carlos Rodríguez</option>
-        </select>
-      </div>
+
       <div className="space-y-2">
         <label
           htmlFor="descripcion"
@@ -148,97 +219,20 @@ export default function SubirPlanoForm() {
         </label>
         <textarea
           id="descripcion"
-          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          placeholder="Descripción del plano..."
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
-        />
+          rows="4"
+          className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        ></textarea>
       </div>
-      <div className="space-y-2">
-        <label
-          htmlFor="archivo"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          Archivo PDF
-        </label>
-        <div className="flex items-center justify-center w-full">
-          <label
-            htmlFor="archivo"
-            className={`flex flex-col items-center justify-center w-full h-32 border-2 ${archivo ? "border-primary border-solid" : "border-dashed"} rounded-lg cursor-pointer ${archivo ? "bg-primary/10" : "bg-muted/50 hover:bg-muted"}`}
-          >
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              {archivo ? (
-                <>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-8 h-8 mb-2 text-primary"
-                  >
-                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                  </svg>
-                  <p className="mb-2 text-sm font-semibold">{archivo.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {(archivo.size / 1024).toFixed(2)} KB - Haga clic para cambiar
-                  </p>
-                </>
-              ) : (
-                <>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-8 h-8 mb-2 text-muted-foreground"
-                  >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                  </svg>
-                  <p className="mb-2 text-sm text-muted-foreground">
-                    <span className="font-semibold">Haga clic para cargar</span> o arrastre y suelte
-                  </p>
-                  <p className="text-xs text-muted-foreground">PDF (MAX. 10MB)</p>
-                </>
-              )}
-            </div>
-            <input
-              id="archivo"
-              type="file"
-              accept=".pdf"
-              className="hidden"
-              ref={fileInputRef}
-              onChange={(e) => setArchivo(e.target.files[0])}
-              required
-            />
-          </label>
-        </div>
-      </div>
-      <div className="flex justify-end gap-2">
-        <a
-          href="/admin/planos"
-          className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-        >
-          Cancelar
-        </a>
+
+      <div className="flex justify-end">
         <button
           type="submit"
+          disabled={isLoading}
           className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-          disabled={loading}
         >
-          {loading ? (
+          {isLoading ? (
             <>
               <svg
                 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"

@@ -47,9 +47,20 @@ export async function query(text, params) {
 // Modelos de datos
 
 // Usuarios
+// Modificar la función getUsers para asegurarnos de que no haya filtros
 export async function getUsers() {
-  const result = await query("SELECT * FROM usuarios ORDER BY id ASC")
-  return result.rows
+  console.log("Ejecutando getUsers() en db.js")
+  try {
+    // Consulta simple sin filtros
+    const result = await query("SELECT * FROM usuarios")
+    console.log(`Usuarios encontrados en db.js: ${result.rows.length}`)
+    console.log("IDs de usuarios encontrados:", result.rows.map((u) => u.id).join(", "))
+    console.log("Tipos de usuarios encontrados:", result.rows.map((u) => u.tipo).join(", "))
+    return result.rows
+  } catch (error) {
+    console.error("Error en getUsers:", error)
+    throw error
+  }
 }
 
 export async function getUserById(id) {
@@ -71,13 +82,25 @@ export async function createUser(userData) {
   return result.rows[0]
 }
 
+// Modificar la función updateUser para manejar la contraseña opcional
 export async function updateUser(id, userData) {
-  const { nombre, email, tipo, empresa, telefono } = userData
-  const result = await query(
-    "UPDATE usuarios SET nombre = $1, email = $2, tipo = $3, empresa = $4, telefono = $5 WHERE id = $6 RETURNING *",
-    [nombre, email, tipo, empresa, telefono, id],
-  )
-  return result.rows[0]
+  const { nombre, email, tipo, empresa, telefono, password } = userData
+
+  // Si se proporciona una nueva contraseña, actualizarla también
+  if (password) {
+    const result = await query(
+      "UPDATE usuarios SET nombre = $1, email = $2, tipo = $3, empresa = $4, telefono = $5, password = $6 WHERE id = $7 RETURNING *",
+      [nombre, email, tipo, empresa, telefono, password, id],
+    )
+    return result.rows[0]
+  } else {
+    // Si no se proporciona contraseña, mantener la actual
+    const result = await query(
+      "UPDATE usuarios SET nombre = $1, email = $2, tipo = $3, empresa = $4, telefono = $5 WHERE id = $6 RETURNING *",
+      [nombre, email, tipo, empresa, telefono, id],
+    )
+    return result.rows[0]
+  }
 }
 
 export async function deleteUser(id) {
@@ -86,12 +109,13 @@ export async function deleteUser(id) {
 }
 
 // Planos
+// Modificar la función getPlanos para ordenar por fecha de subida en orden descendente
 export async function getPlanos() {
   const result = await query(`
     SELECT p.*, u.nombre as cliente_nombre 
     FROM planos p
     LEFT JOIN usuarios u ON p.usuario_id = u.id
-    ORDER BY p.id ASC
+    ORDER BY p.fecha_subida DESC, p.id DESC
   `)
   return result.rows
 }
@@ -109,13 +133,14 @@ export async function getPlanoById(id) {
   return result.rows[0]
 }
 
+// También modificar la función para obtener los planos por usuario
 export async function getPlanosByUserId(userId) {
   const result = await query(
     `
     SELECT * FROM planos 
     WHERE usuario_id = $1 
-    ORDER BY id ASC
-  `,
+    ORDER BY fecha_subida DESC, id DESC
+    `,
     [userId],
   )
   return result.rows

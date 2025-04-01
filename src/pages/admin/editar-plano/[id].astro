@@ -1,0 +1,229 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getUserById, getUsers } from '../../../lib/db.js';
+
+// Obtener el ID del usuario de los parámetros de la URL
+const { id } = Astro.params;
+
+// Obtener información del usuario
+let usuario = null;
+let error = null;
+
+try {
+  if (id) {
+    usuario = await getUserById(parseInt(id));
+    if (!usuario) {
+      error = "Usuario no encontrado";
+    }
+  } else {
+    error = "ID de usuario no proporcionado";
+  }
+} catch (e) {
+  console.error("Error al obtener datos del usuario:", e);
+  error = "Error al cargar los datos del usuario";
+}
+---
+
+<AdminLayout title="Editar Usuario" activeLink="usuarios">
+  <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-2xl font-bold tracking-tight">Editar Usuario</h1>
+      <p class="text-muted-foreground">
+        Modifique los detalles del usuario seleccionado.
+      </p>
+    </div>
+
+    {error && (
+      <div class="bg-destructive/15 text-destructive p-4 rounded-md">
+        <p>{error}</p>
+        <a href="/admin/usuarios" class="text-primary hover:underline mt-2 inline-block">Volver a la lista de usuarios</a>
+      </div>
+    )}
+
+    {usuario && (
+      <div class="rounded-lg border shadow-sm">
+        <div class="p-6">
+          <form id="editarUsuarioForm" class="space-y-6">
+            <input type="hidden" name="id" value={usuario.id} />
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-2">
+                <label for="nombre" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nombre</label>
+                <input
+                  type="text"
+                  id="nombre"
+                  name="nombre"
+                  value={usuario.nombre}
+                  required
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+              
+              <div class="space-y-2">
+                <label for="email" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={usuario.email}
+                  required
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+              
+              <div class="space-y-2">
+                <label for="tipo" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Tipo de Usuario</label>
+                <select
+                  id="tipo"
+                  name="tipo"
+                  required
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="admin" selected={usuario.tipo === 'admin' || usuario.tipo === 'Admin'}>Administrador</option>
+                  <option value="cliente" selected={usuario.tipo === 'cliente' || usuario.tipo === 'Cliente'}>Cliente</option>
+                </select>
+              </div>
+              
+              <div class="space-y-2">
+                <label for="telefono" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Teléfono</label>
+                <input
+                  type="tel"
+                  id="telefono"
+                  name="telefono"
+                  value={usuario.telefono || ''}
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+              
+              <div class="space-y-2">
+                <label for="empresa" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Empresa</label>
+                <input
+                  type="text"
+                  id="empresa"
+                  name="empresa"
+                  value={usuario.empresa || ''}
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+              
+              <div class="space-y-2">
+                <label for="password" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nueva Contraseña (dejar en blanco para mantener la actual)</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+            </div>
+            
+            <div class="flex justify-end gap-4">
+              <a 
+                href="/admin/usuarios" 
+                class="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              >
+                Cancelar
+              </a>
+              <button 
+                type="button" 
+                id="guardarCambios"
+                class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              >
+                Guardar Cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )}
+  </div>
+</AdminLayout>
+
+<script is:inline>
+  // Función para guardar los cambios del usuario
+  function guardarCambiosUsuario() {
+    console.log('Guardando cambios del usuario...');
+    
+    // Obtener el formulario
+    const form = document.getElementById('editarUsuarioForm');
+    
+    if (form) {
+      // Obtener los datos del formulario
+      const formData = new FormData(form);
+      
+      const id = formData.get('id');
+      const nombre = formData.get('nombre');
+      const email = formData.get('email');
+      const tipo = formData.get('tipo');
+      const telefono = formData.get('telefono');
+      const empresa = formData.get('empresa');
+      const password = formData.get('password');
+      
+      // Crear el objeto de datos a enviar
+      const userData = {
+        id,
+        nombre,
+        email,
+        tipo,
+        telefono: telefono || null,
+        empresa: empresa || null,
+      };
+      
+      // Añadir la contraseña solo si se ha proporcionado una nueva
+      if (password && password.trim() !== '') {
+        userData.password = password;
+      }
+      
+      // Mostrar los datos que se van a enviar (para depuración)
+      console.log('Enviando datos:', userData);
+      
+      // Enviar los datos al servidor
+      fetch('/api/actualizar-usuario', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+      .then(response => {
+        console.log('Respuesta recibida:', response);
+        return response.json();
+      })
+      .then(data => {
+        console.log('Datos recibidos:', data);
+        if (data.success) {
+          alert('Usuario actualizado correctamente');
+          window.location.href = '/admin/usuarios';
+        } else {
+          alert(`Error: ${data.error || 'No se pudo actualizar el usuario'}`);
+        }
+      })
+      .catch(error => {
+        console.error('Error al actualizar el usuario:', error);
+        alert('Error al actualizar el usuario. Por favor, inténtelo de nuevo.');
+      });
+    } else {
+      console.error('Formulario no encontrado');
+    }
+  }
+  
+  // Esperar a que el DOM esté completamente cargado
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM cargado, inicializando eventos...');
+    
+    // Obtener el botón
+    const guardarBtn = document.getElementById('guardarCambios');
+    
+    if (guardarBtn) {
+      console.log('Botón de guardar encontrado, agregando evento click');
+      
+      guardarBtn.addEventListener('click', () => {
+        console.log('Botón de guardar clickeado');
+        guardarCambiosUsuario();
+      });
+    } else {
+      console.error('Botón de guardar no encontrado');
+    }
+  });
+</script>
+

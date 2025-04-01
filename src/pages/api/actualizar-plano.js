@@ -2,11 +2,16 @@ import { updatePlano, getPlanoById } from "../../lib/db.js"
 
 export async function POST({ request }) {
   try {
+    console.log("Recibida solicitud para actualizar plano")
+
     const data = await request.json()
+    console.log("Datos recibidos:", data)
+
     const { id, nombre, tipo, usuario_id, descripcion } = data
 
     // Validar que se recibieron todos los datos necesarios
     if (!id || !nombre || !tipo || !usuario_id) {
+      console.error("Faltan datos requeridos")
       return new Response(JSON.stringify({ error: "Faltan datos requeridos" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
@@ -16,6 +21,7 @@ export async function POST({ request }) {
     // Verificar que el plano existe
     const planoExistente = await getPlanoById(id)
     if (!planoExistente) {
+      console.error("Plano no encontrado")
       return new Response(JSON.stringify({ error: "Plano no encontrado" }), {
         status: 404,
         headers: { "Content-Type": "application/json" },
@@ -28,6 +34,8 @@ export async function POST({ request }) {
       tipo,
       descripcion: descripcion || "",
     })
+
+    console.log("Plano actualizado correctamente:", planoActualizado)
 
     return new Response(JSON.stringify({ success: true, plano: planoActualizado }), {
       status: 200,

@@ -2,7 +2,9 @@ import { getUsers } from "../../lib/db.js"
 
 export async function GET() {
   try {
+    console.log("API: Obteniendo usuarios...")
     const usuarios = await getUsers()
+    console.log(`API: Se encontraron ${usuarios.length} usuarios`)
 
     // No devolver las contraseñas
     const usuariosSinPassword = usuarios.map(({ password, ...rest }) => rest)

@@ -1,0 +1,140 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Verificar Planos y Usuarios" activeLink="configuracion">
+  <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-2xl font-bold tracking-tight">Verificar Planos y Usuarios</h1>
+      <p class="text-muted-foreground">
+        Herramienta para verificar la relación entre planos y usuarios.
+      </p>
+    </div>
+    
+    <div class="rounded-lg border shadow-sm">
+      <div class="p-6">
+        <h2 class="text-xl font-semibold mb-4">Información de Planos y Usuarios</h2>
+        
+        <div id="planos-info" class="space-y-4">
+          <p>Cargando información de planos y usuarios...</p>
+        </div>
+        
+        <div class="mt-6">
+          <button 
+            id="refresh-btn"
+            class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            Actualizar Información
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  // Función para verificar planos y usuarios
+  async function checkPlanosUsuarios() {
+    try {
+      const planosInfoDiv = document.getElementById('planos-info');
+      if (planosInfoDiv) {
+        planosInfoDiv.innerHTML = '<p>Cargando información de planos y usuarios...</p>';
+      }
+      
+      const response = await fetch('/api/verificar-planos-usuarios');
+      const data = await response.json();
+      
+      if (planosInfoDiv) {
+        if (data.success) {
+          let html = '<div class="space-y-6">';
+          
+          // Resumen
+          html += '<div class="bg-gray-50 p-4 rounded">';
+          html += `<p><strong>Total de planos:</strong> ${data.totalPlanos}</p>`;
+          html += `<p><strong>Planos sin usuario asociado:</strong> ${data.planosSinUsuario}</p>`;
+          html += `<p><strong>Total de clientes:</strong> ${data.totalClientes}</p>`;
+          html += '</div>';
+          
+          // Planos sin usuario
+          if (data.planosSinUsuario > 0) {
+            html += '<div class="mt-4">';
+            html += '<h3 class="text-lg font-medium mb-2">Planos sin usuario asociado</h3>';
+            html += '<div class="bg-gray-100 p-4 rounded overflow-auto max-h-60">';
+            html += '<table class="min-w-full">';
+            html += '<thead><tr><th class="text-left pr-4">ID</th><th class="text-left pr-4">Nombre</th><th class="text-left pr-4">Tipo</th><th class="text-left">Usuario ID</th></tr></thead>';
+            html += '<tbody>';
+            
+            data.detallesPlanosSinUsuario.forEach(plano => {
+              html += `<tr><td class="pr-4">${plano.id}</td><td class="pr-4">${plano.nombre}</td><td class="pr-4">${plano.tipo}</td><td>${plano.usuario_id}</td></tr>`;
+            });
+            
+            html += '</tbody></table>';
+            html += '</div>';
+            html += '</div>';
+          }
+          
+          // Lista de clientes
+          html += '<div class="mt-4">';
+          html += '<h3 class="text-lg font-medium mb-2">Clientes disponibles</h3>';
+          html += '<div class="bg-gray-100 p-4 rounded overflow-auto max-h-60">';
+          html += '<table class="min-w-full">';
+          html += '<thead><tr><th class="text-left pr-4">ID</th><th class="text-left pr-4">Nombre</th><th class="text-left">Email</th></tr></thead>';
+          html += '<tbody>';
+          
+          data.clientes.forEach(cliente => {
+            html += `<tr><td class="pr-4">${cliente.id}</td><td class="pr-4">${cliente.nombre}</td><td>${cliente.email}</td></tr>`;
+          });
+          
+          html += '</tbody></table>';
+          html += '</div>';
+          html += '</div>';
+          
+          // Todos los planos
+          html += '<div class="mt-4">';
+          html += '<h3 class="text-lg font-medium mb-2">Todos los planos</h3>';
+          html += '<div class="bg-gray-100 p-4 rounded overflow-auto max-h-96">';
+          html += '<table class="min-w-full">';
+          html += '<thead><tr><th class="text-left pr-4">ID</th><th class="text-left pr-4">Nombre</th><th class="text-left pr-4">Tipo</th><th class="text-left pr-4">Fecha</th><th class="text-left pr-4">Usuario ID</th><th class="text-left">Usuario Nombre</th></tr></thead>';
+          html += '<tbody>';
+          
+          data.todosLosPlanos.forEach(plano => {
+            const fecha = new Date(plano.fecha_subida).toLocaleDateString();
+            html += `<tr><td class="pr-4">${plano.id}</td><td class="pr-4">${plano.nombre}</td><td class="pr-4">${plano.tipo}</td><td class="pr-4">${fecha}</td><td class="pr-4">${plano.usuario_id}</td><td>${plano.usuario_nombre || 'No encontrado'}</td></tr>`;
+          });
+          
+          html += '</tbody></table>';
+          html += '</div>';
+          html += '</div>';
+          
+          html += '</div>'; // Cierre del contenedor principal
+          
+          planosInfoDiv.innerHTML = html;
+        } else {
+          planosInfoDiv.innerHTML = `<p class="text-red-600">Error: ${data.error || 'Ocurrió un error desconocido'}</p>`;
+          if (data.details) {
+            planosInfoDiv.innerHTML += `<p class="text-sm text-muted-foreground">${data.details}</p>`;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error al verificar planos y usuarios:', error);
+      const planosInfoDiv = document.getElementById('planos-info');
+      if (planosInfoDiv) {
+        planosInfoDiv.innerHTML = '<p class="text-red-600">Error al verificar planos y usuarios</p>';
+      }
+    }
+  }
+  
+  // Ejecutar cuando el DOM esté cargado
+  document.addEventListener('DOMContentLoaded', () => {
+    // Verificar planos y usuarios
+    checkPlanosUsuarios();
+    
+    // Agregar evento al botón de actualizar
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', checkPlanosUsuarios);
+    }
+  });
+</script>
+

@@ -12,10 +12,15 @@ const uploadDir = path.join(__dirname, "../../../public")
 
 export async function POST({ request }) {
   try {
+    console.log("Recibida solicitud para eliminar plano")
+
     const data = await request.json()
+    console.log("Datos recibidos:", data)
+
     const { id } = data
 
     if (!id) {
+      console.error("ID de plano no proporcionado")
       return new Response(JSON.stringify({ error: "ID de plano no proporcionado" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
@@ -25,17 +30,25 @@ export async function POST({ request }) {
     // Obtener información del plano antes de eliminarlo
     const plano = await getPlanoById(id)
     if (!plano) {
+      console.error("Plano no encontrado")
       return new Response(JSON.stringify({ error: "Plano no encontrado" }), {
         status: 404,
         headers: { "Content-Type": "application/json" },
       })
     }
 
+    console.log("Plano encontrado:", plano)
+
     // Eliminar el archivo físico
     try {
       const filePath = path.join(uploadDir, plano.archivo_url)
+      console.log("Intentando eliminar archivo:", filePath)
+
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath)
+        console.log("Archivo eliminado correctamente")
+      } else {
+        console.log("El archivo no existe en el sistema de archivos")
       }
     } catch (fileError) {
       console.error("Error al eliminar el archivo físico:", fileError)
@@ -44,6 +57,7 @@ export async function POST({ request }) {
 
     // Eliminar el registro de la base de datos
     await deletePlano(id)
+    console.log("Plano eliminado de la base de datos")
 
     return new Response(JSON.stringify({ success: true, message: "Plano eliminado correctamente" }), {
       status: 200,

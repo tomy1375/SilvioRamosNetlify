@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -13,6 +13,63 @@ export default function ContactPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState("")
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  // Detectar cambios en el tema de Astro
+  useEffect(() => {
+    // Función para verificar el tema actual
+    const checkTheme = () => {
+      const isDark = document.documentElement.classList.contains("dark")
+      setIsDarkMode(isDark)
+
+      // Forzar actualización de estilos
+      const boxes = document.querySelectorAll(".theme-box")
+      boxes.forEach((box) => {
+        if (isDark) {
+          box.style.backgroundColor = "rgb(30, 41, 59)" // slate-800
+        } else {
+          box.style.backgroundColor = "white"
+        }
+      })
+
+      // Actualizar estilos de texto
+      const textElements = document.querySelectorAll(".theme-text")
+      textElements.forEach((el) => {
+        if (isDark) {
+          el.style.color = "rgb(229, 231, 235)" // gray-200
+        } else {
+          el.style.color = "rgb(31, 41, 55)" // gray-800
+        }
+      })
+
+      const subtextElements = document.querySelectorAll(".theme-subtext")
+      subtextElements.forEach((el) => {
+        if (isDark) {
+          el.style.color = "rgb(209, 213, 219)" // gray-300
+        } else {
+          el.style.color = "rgb(55, 65, 81)" // gray-700
+        }
+      })
+    }
+
+    // Verificar el tema inicial
+    checkTheme()
+
+    // Crear un observador para detectar cambios en la clase 'dark'
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "class") {
+          checkTheme()
+        }
+      })
+    })
+
+    // Iniciar la observación del elemento html
+    observer.observe(document.documentElement, { attributes: true })
+
+    // Limpiar el observador cuando el componente se desmonte
+    return () => observer.disconnect()
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -47,21 +104,48 @@ export default function ContactPage() {
     }, 1500)
   }
 
+  // Estilos inline para forzar los colores
+  const boxStyle = {
+    backgroundColor: isDarkMode ? "rgb(30, 41, 59)" : "white",
+    color: isDarkMode ? "white" : "black",
+    transition: "background-color 0.3s, color 0.3s",
+  }
+
+  const titleStyle = {
+    color: isDarkMode ? "white" : "rgb(17, 24, 39)", // gray-900 en modo claro
+    fontWeight: "bold",
+    transition: "color 0.3s",
+  }
+
+  const textStyle = {
+    color: isDarkMode ? "rgb(229, 231, 235)" : "rgb(31, 41, 55)", // gray-200 en oscuro, gray-800 en claro
+    transition: "color 0.3s",
+  }
+
+  const subtextStyle = {
+    color: isDarkMode ? "rgb(209, 213, 219)" : "rgb(55, 65, 81)", // gray-300 en oscuro, gray-700 en claro
+    transition: "color 0.3s",
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 font-sans text-gray-800 ">
+    <div className="max-w-7xl mx-auto px-4 py-8 font-sans">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">Contacto</h1>
-        <p className="text-lg text-gray-600">
+        <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl mb-4" style={titleStyle}>
+          Contacto
+        </h1>
+        <p className="text-lg" style={subtextStyle}>
           Estamos listos para ayudarte con tu próximo proyecto de ingeniería civil
         </p>
       </div>
 
       <div className="flex flex-wrap gap-8 mb-12">
-        <div className="flex-1 min-w-[300px] bg-gray-50 p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Información de Contacto</h2>
+        <div className="flex-1 min-w-[300px] p-8 rounded-lg shadow-md theme-box" style={boxStyle}>
+          <h2 className="text-2xl font-bold mb-6" style={titleStyle}>
+            Información de Contacto
+          </h2>
 
           <div className="flex mb-6">
-            <div className="mr-4 text-blue-500 bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center">
+            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -77,13 +161,17 @@ export default function ContactPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium text-gray-800 mb-1">Teléfono</h3>
-              <p className="text-gray-600">+54 388 123 4567</p>
+              <h3 className="font-medium mb-1 theme-text" style={textStyle}>
+                Teléfono
+              </h3>
+              <p className="theme-subtext" style={subtextStyle}>
+                +54 388 123 4567
+              </p>
             </div>
           </div>
 
           <div className="flex mb-6">
-            <div className="mr-4 text-blue-500 bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center">
+            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -100,13 +188,17 @@ export default function ContactPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium text-gray-800 mb-1">Email</h3>
-              <p className="text-gray-600">contacto@ingenieriacivil.com</p>
+              <h3 className="font-medium mb-1 theme-text" style={textStyle}>
+                Email
+              </h3>
+              <p className="theme-subtext" style={subtextStyle}>
+                contacto@ingenieriacivil.com
+              </p>
             </div>
           </div>
 
           <div className="flex mb-6">
-            <div className="mr-4 text-blue-500 bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center">
+            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -123,8 +215,10 @@ export default function ContactPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium text-gray-800 mb-1">Dirección</h3>
-              <p className="text-gray-600">
+              <h3 className="font-medium mb-1 theme-text" style={textStyle}>
+                Dirección
+              </h3>
+              <p className="theme-subtext" style={subtextStyle}>
                 Remedios de Escalada 193
                 <br />
                 Y4600 San Salvador de Jujuy, Jujuy
@@ -133,7 +227,7 @@ export default function ContactPage() {
           </div>
 
           <div className="flex mb-6">
-            <div className="mr-4 text-blue-500 bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center">
+            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -150,8 +244,10 @@ export default function ContactPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium text-gray-800 mb-1">Horario</h3>
-              <p className="text-gray-600">
+              <h3 className="font-medium mb-1 theme-text" style={textStyle}>
+                Horario
+              </h3>
+              <p className="theme-subtext" style={subtextStyle}>
                 Lunes - Viernes: 9:00 - 18:00
                 <br />
                 Sábado: 10:00 - 14:00
@@ -221,16 +317,20 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className="flex-[2] min-w-[300px] p-8 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Envíanos un Mensaje</h2>
+        <div className="flex-[2] min-w-[300px] p-8 rounded-lg shadow-md theme-box" style={boxStyle}>
+          <h2 className="text-2xl font-bold mb-6" style={titleStyle}>
+            Envíanos un Mensaje
+          </h2>
 
           {submitMessage && (
-            <div className="bg-green-100 text-green-800 p-4 rounded-md mb-6 text-center">{submitMessage}</div>
+            <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 p-4 rounded-md mb-6 text-center">
+              {submitMessage}
+            </div>
           )}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-6">
-              <label htmlFor="name" className="block mb-2 font-medium text-gray-800">
+              <label htmlFor="name" className="block mb-2 font-medium theme-text" style={textStyle}>
                 Nombre Completo
               </label>
               <input
@@ -240,13 +340,17 @@ export default function ContactPage() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                style={{
+                  backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
+                  color: isDarkMode ? "white" : "rgb(31, 41, 55)",
+                }}
               />
             </div>
 
             <div className="flex flex-wrap gap-4 mb-6">
               <div className="flex-1 min-w-[200px]">
-                <label htmlFor="email" className="block mb-2 font-medium text-gray-800">
+                <label htmlFor="email" className="block mb-2 font-medium theme-text" style={textStyle}>
                   Email
                 </label>
                 <input
@@ -256,12 +360,16 @@ export default function ContactPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  style={{
+                    backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
+                    color: isDarkMode ? "white" : "rgb(31, 41, 55)",
+                  }}
                 />
               </div>
 
               <div className="flex-1 min-w-[200px]">
-                <label htmlFor="phone" className="block mb-2 font-medium text-gray-800">
+                <label htmlFor="phone" className="block mb-2 font-medium theme-text" style={textStyle}>
                   Teléfono
                 </label>
                 <input
@@ -270,13 +378,17 @@ export default function ContactPage() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  style={{
+                    backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
+                    color: isDarkMode ? "white" : "rgb(31, 41, 55)",
+                  }}
                 />
               </div>
             </div>
 
             <div className="mb-6">
-              <label htmlFor="subject" className="block mb-2 font-medium text-gray-800">
+              <label htmlFor="subject" className="block mb-2 font-medium theme-text" style={textStyle}>
                 Asunto
               </label>
               <input
@@ -286,12 +398,16 @@ export default function ContactPage() {
                 value={formData.subject}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                style={{
+                  backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
+                  color: isDarkMode ? "white" : "rgb(31, 41, 55)",
+                }}
               />
             </div>
 
             <div className="mb-6">
-              <label htmlFor="message" className="block mb-2 font-medium text-gray-800">
+              <label htmlFor="message" className="block mb-2 font-medium theme-text" style={textStyle}>
                 Mensaje
               </label>
               <textarea
@@ -301,14 +417,20 @@ export default function ContactPage() {
                 value={formData.message}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                style={{
+                  backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
+                  color: isDarkMode ? "white" : "rgb(31, 41, 55)",
+                }}
               ></textarea>
             </div>
 
             <button
               type="submit"
               className={`w-full py-3 px-6 rounded-md font-semibold text-white transition-colors ${
-                isSubmitting ? "bg-gray-500 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+                isSubmitting
+                  ? "bg-gray-500 dark:bg-gray-600 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
               }`}
               disabled={isSubmitting}
             >
@@ -319,7 +441,9 @@ export default function ContactPage() {
       </div>
 
       <div className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Nuestra Ubicación</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center" style={titleStyle}>
+          Nuestra Ubicación
+        </h2>
         <div className="rounded-lg overflow-hidden shadow-md">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d467.0304553374726!2d-65.31090980000001!3d-24.177588!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x941b0f135d53d4ab%3A0x2c760e0263ce334a!2sRemedios%20de%20Escalada%20193%2C%20Y4600%20San%20Salvador%20de%20Jujuy%2C%20Jujuy!5e0!3m2!1ses!2sar!4v1711644405000!5m2!1ses!2sar"
@@ -329,6 +453,7 @@ export default function ContactPage() {
             allowFullScreen=""
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
+            className="dark:opacity-90"
           ></iframe>
         </div>
       </div>

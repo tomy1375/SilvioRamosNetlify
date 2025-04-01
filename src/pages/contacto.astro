@@ -5,5 +5,7 @@ import ContactPage from '../components/ContactPage';
 ---
 
 <Layout title="Contacto - Ingeniería Civil">
-  <ContactPage client:load />
+  <div class="container px-4 md:px-6 py-12 md:py-24">
+    <ContactPage client:only="react" />
+  </div>
 </Layout>
