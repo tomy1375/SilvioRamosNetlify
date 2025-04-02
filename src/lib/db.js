@@ -1,5 +1,5 @@
-import pg from "pg"
-const { Pool } = pg
+import pkg from "pg"
+const { Pool } = pkg
 
 // Función para validar las variables de entorno
 function validateEnvVars() {
@@ -184,12 +184,12 @@ export async function deletePlano(id) {
 export async function getHistorialByUserId(userId) {
   const result = await query(
     `
-    SELECT h.id, h.fecha, h.hora, p.nombre, p.tipo, p.archivo_url
+    SELECT h.id, h.fecha, h.hora, p.id as plano_id, p.nombre, p.tipo, p.archivo_url
     FROM historial h
     JOIN planos p ON h.plano_id = p.id
     WHERE h.usuario_id = $1
     ORDER BY h.fecha DESC, h.hora DESC
-  `,
+    `,
     [userId],
   )
   return result.rows
@@ -197,10 +197,19 @@ export async function getHistorialByUserId(userId) {
 
 export async function createHistorial(historialData) {
   const { usuario_id, plano_id, fecha, hora } = historialData
-  const result = await query(
-    "INSERT INTO historial (usuario_id, plano_id, fecha, hora) VALUES ($1, $2, $3, $4) RETURNING *",
-    [usuario_id, plano_id, fecha, hora],
-  )
-  return result.rows[0]
+
+  console.log(`Creando registro de historial: usuario=${usuario_id}, plano=${plano_id}, fecha=${fecha}, hora=${hora}`)
+
+  try {
+    const result = await query(
+      "INSERT INTO historial (usuario_id, plano_id, fecha, hora) VALUES ($1, $2, $3, $4) RETURNING *",
+      [usuario_id, plano_id, fecha, hora],
+    )
+    console.log("Historial creado:", result.rows[0])
+    return result.rows[0]
+  } catch (error) {
+    console.error("Error al crear historial:", error)
+    throw error
+  }
 }
 

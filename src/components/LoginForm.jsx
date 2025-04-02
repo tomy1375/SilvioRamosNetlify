@@ -1,147 +1,157 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 export default function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [isDarkMode, setIsDarkMode] = useState(false)
-
-  // Detectar cambios en el tema de Astro
-  useEffect(() => {
-    // Función para verificar el tema actual
-    const checkTheme = () => {
-      const isDark = document.documentElement.classList.contains("dark")
-      setIsDarkMode(isDark)
-    }
-
-    // Verificar el tema inicial
-    checkTheme()
-
-    // Crear un observador para detectar cambios en la clase 'dark'
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === "class") {
-          checkTheme()
-        }
-      })
-    })
-
-    // Iniciar la observación del elemento html
-    observer.observe(document.documentElement, { attributes: true })
-
-    // Limpiar el observador cuando el componente se desmonte
-    return () => observer.disconnect()
-  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
+    setIsLoading(true)
     setError("")
 
     try {
-      // Aquí iría la lógica de autenticación real
-      // Por ahora, simulamos un inicio de sesión
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const formData = new FormData()
+      formData.append("email", email)
+      formData.append("password", password)
 
-      // Redirigir según el rol (simulado)
-      if (email === "admin@ingecivil.com") {
-        window.location.href = "/admin"
+      const response = await fetch("/login", {
+        method: "POST",
+        body: formData,
+      })
+
+      const contentType = response.headers.get("content-type")
+
+      if (contentType && contentType.includes("text/html")) {
+        // Si la respuesta es HTML, probablemente sea una redirección
+        const html = await response.text()
+
+        // Buscar la URL de redirección en el meta refresh
+        const redirectMatch = html.match(/content="0;url=([^"]+)"/)
+        if (redirectMatch && redirectMatch[1]) {
+          window.location.href = redirectMatch[1]
+          return
+        }
+
+        // Buscar mensajes de error en la respuesta HTML
+        const errorMatch = html.match(
+          /<div class="bg-destructive\/15 text-destructive p-4 rounded-md mb-4"><p>(.*?)<\/p><\/div>/,
+        )
+        if (errorMatch && errorMatch[1]) {
+          setError(errorMatch[1])
+        } else {
+          setError("Error al iniciar sesión. Por favor, inténtelo de nuevo.")
+        }
       } else {
-        window.location.href = "/cliente"
+        // Si no es HTML, intentar parsear como JSON
+        try {
+          const data = await response.json()
+          if (data.error) {
+            setError(data.error)
+          } else if (response.redirected) {
+            window.location.href = response.url
+          }
+        } catch (e) {
+          setError("Error al procesar la respuesta del servidor.")
+        }
       }
     } catch (err) {
-      setError("Credenciales incorrectas. Por favor, inténtelo de nuevo.")
+      console.error("Error al iniciar sesión:", err)
+      setError("Error al procesar la solicitud. Por favor, inténtelo de nuevo.")
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
-  // Estilos para modo oscuro/claro
-  const inputStyle = {
-    backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
-    color: isDarkMode ? "white" : "rgb(31, 41, 55)",
-    borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
-    transition: "background-color 0.3s, color 0.3s, border-color 0.3s",
-  }
-
-  const labelStyle = {
-    color: isDarkMode ? "rgb(229, 231, 235)" : "rgb(31, 41, 55)",
-    transition: "color 0.3s",
-  }
-
-  const linkStyle = {
-    color: isDarkMode ? "rgb(96, 165, 250)" : "rgb(59, 130, 246)",
-    transition: "color 0.3s",
-  }
-
-  const textStyle = {
-    color: isDarkMode ? "rgb(209, 213, 219)" : "rgb(75, 85, 99)",
-    transition: "color 0.3s",
-  }
-
   return (
-    <div className="space-y-4">
-      {error && <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">{error}</div>}
-      <form className="space-y-4" onSubmit={handleSubmit}>
+    <div>
+      {error && (
+        <div className="bg-destructive/15 text-destructive p-4 rounded-md mb-4">
+          <p>{error}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label
-            htmlFor="email"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            style={labelStyle}
-          >
-            Correo Electrónico
+          <label htmlFor="email" className="block text-sm font-medium">
+            Email
           </label>
           <input
-            id="email"
             type="email"
-            className="flex h-10 w-full rounded-md border px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            style={inputStyle}
-            placeholder="nombre@ejemplo.com"
-            required
+            id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder="correo@ejemplo.com"
           />
         </div>
+
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label
-              htmlFor="password"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              style={labelStyle}
-            >
-              Contraseña
+          <label htmlFor="password" className="block text-sm font-medium">
+            Contraseña
+          </label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <input
+              id="remember-me"
+              name="remember-me"
+              type="checkbox"
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <label htmlFor="remember-me" className="ml-2 block text-sm">
+              Recordarme
             </label>
-            <a href="/recuperar-contrasena" className="text-sm hover:underline" style={linkStyle}>
+          </div>
+
+          <div className="text-sm">
+            <a href="#" className="font-medium text-primary hover:text-primary/80">
               ¿Olvidó su contraseña?
             </a>
           </div>
-          <input
-            id="password"
-            type="password"
-            className="flex h-10 w-full rounded-md border px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            style={inputStyle}
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
         </div>
+
         <button
-          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full"
           type="submit"
-          disabled={loading}
+          disabled={isLoading}
+          className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
         >
-          {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+          {isLoading ? (
+            <>
+              <svg
+                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Iniciando sesión...
+            </>
+          ) : (
+            "Iniciar Sesión"
+          )}
         </button>
       </form>
-      <div className="text-center text-sm" style={textStyle}>
-        ¿No tiene una cuenta?{" "}
-        <a href="/contacto" className="hover:underline" style={linkStyle}>
-          Contacte al administrador
-        </a>
-      </div>
     </div>
   )
 }

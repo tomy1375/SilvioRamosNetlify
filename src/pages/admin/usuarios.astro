@@ -99,127 +99,132 @@ try {
 </div>
 </AdminLayout>
 
-<!-- Incluir SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-import Swal from "sweetalert2";
+  import Swal from "sweetalert2";
 
-// Definir las funciones fuera del evento DOMContentLoaded para que estén disponibles globalmente
-function setupDeleteButtons() {
-  console.log("Configurando botones de eliminar para usuarios...");
-  document.querySelectorAll('.eliminar-usuario').forEach(function(boton) {
-    // Clonar y reemplazar para evitar múltiples event listeners
-    const clonedBtn = boton.cloneNode(true);
-    boton.parentNode.replaceChild(clonedBtn, boton);
-    
-    clonedBtn.addEventListener('click', function() {
-      const id = this.getAttribute('data-id');
-      const nombre = this.getAttribute('data-nombre');
-      const fila = this.closest('tr');
-      
-      // Usar SweetAlert2 para la confirmación
-      Swal.fire({
-        title: '¿Está seguro?',
-        text: `¿Desea eliminar el usuario "${nombre}"?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          eliminarUsuario(id, fila);
-        }
-      });
-    });
-  });
-}
-
-// Función para eliminar un usuario
-function eliminarUsuario(id, fila) {
-  // Mostrar indicador de carga
-  Swal.fire({
-    title: 'Eliminando...',
-    text: 'Por favor espere',
-    allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
+  // Cargar estilos de SweetAlert2 inmediatamente
+  (function() {
+    if (!document.querySelector('link[href*="sweetalert2.min.css"]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css';
+      document.head.appendChild(link);
+      console.log("Estilos de SweetAlert2 cargados inmediatamente.");
     }
-  });
-  
-  fetch('/api/eliminar-usuario', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ id: id }),
-  })
-  .then(function(response) {
-    return response.json();
-  })
-  .then(function(data) {
-    if (data.success) {
-      // Eliminar la fila de la tabla sin recargar la página
-      if (fila) {
-        fila.remove();
+  })();
+
+  // Definir interfaces para TypeScript
+  interface DeleteButton extends HTMLButtonElement {
+    getAttribute(name: string): string | null;
+    closest<E extends Element = Element>(selector: string): E | null;
+  }
+
+  // Función para eliminar un usuario
+  function eliminarUsuario(id: string, fila: HTMLTableRowElement | null): void {
+    Swal.fire({
+      title: 'Eliminando...',
+      text: 'Por favor espere',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
       }
-      
-      // Verificar si la tabla está vacía
-      const tbody = document.getElementById('usuariosTableBody');
-      if (tbody && tbody.children.length === 0) {
-        // Si no hay más usuarios, mostrar mensaje
-        const container = tbody.closest('.relative');
-        if (container) {
-          container.innerHTML = `
-            <div class="text-center py-8">
-              <p class="text-muted-foreground">No hay usuarios disponibles. Cree su primer usuario.</p>
-            </div>
-          `;
+    });
+    
+    fetch('/api/eliminar-usuario', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: id }),
+    })
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data: { success: boolean, error?: string }) {
+      if (data.success) {
+        if (fila) {
+          fila.remove();
         }
+        Swal.fire({
+          title: '¡Eliminado!',
+          text: 'El usuario ha sido eliminado correctamente.',
+          icon: 'success',
+          confirmButtonColor: '#3085d6'
+        });
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: data.error || 'No se pudo eliminar el usuario',
+          icon: 'error',
+          confirmButtonColor: '#3085d6'
+        });
       }
-      
-      // Mostrar mensaje de éxito
-      Swal.fire({
-        title: '¡Eliminado!',
-        text: 'El usuario ha sido eliminado correctamente.',
-        icon: 'success',
-        confirmButtonColor: '#3085d6'
-      });
-    } else {
+    })
+    .catch(function(error) {
+      console.error('Error al eliminar el usuario:', error);
       Swal.fire({
         title: 'Error',
-        text: data.error || 'No se pudo eliminar el usuario',
+        text: 'Error al eliminar el usuario. Por favor, inténtelo de nuevo.',
         icon: 'error',
         confirmButtonColor: '#3085d6'
       });
-    }
-  })
-  .catch(function(error) {
-    console.error('Error al eliminar el usuario:', error);
-    Swal.fire({
-      title: 'Error',
-      text: 'Error al eliminar el usuario. Por favor, inténtelo de nuevo.',
-      icon: 'error',
-      confirmButtonColor: '#3085d6'
     });
+  }
+
+  // Función para configurar botones de eliminar
+  function setupDeleteButtons(): void {
+    console.log("Configurando botones de eliminar para usuarios...");
+    
+    const deleteButtons = document.querySelectorAll<DeleteButton>('.eliminar-usuario');
+    
+    deleteButtons.forEach(function(boton) {
+      const id = boton.getAttribute('data-id');
+      const nombre = boton.getAttribute('data-nombre');
+
+      if (!id || !nombre) {
+        console.error('Faltan atributos de datos en el botón');
+        return;
+      }
+
+      boton.addEventListener('click', function() {
+        Swal.fire({
+          title: '¿Está seguro?',
+          text: `¿Desea eliminar el usuario "${nombre}"?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            const fila = this.closest('tr');
+            eliminarUsuario(id, fila);
+          }
+        });
+      });
+    });
+  }
+
+  // Función para inicializar todo
+  function initializePage(): void {
+    console.log("Inicializando página de usuarios...");
+    setupDeleteButtons();
+  }
+
+  // Ejecutar en DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOMContentLoaded disparado");
+    initializePage();
   });
-}
 
-// Función para inicializar todo
-function initializePage() {
-  console.log("Inicializando página de usuarios...");
-  setupDeleteButtons();
-}
+  // Ejecutar también en el evento astro:page-load para View Transitions
+  document.addEventListener('astro:page-load', function() {
+    console.log("astro:page-load disparado");
+    initializePage();
+  });
 
-// Ejecutar en DOMContentLoaded
-document.addEventListener('DOMContentLoaded', initializePage);
-
-// Ejecutar también en el evento astro:page-load para View Transitions
-document.addEventListener('astro:page-load', initializePage);
-
-// Ejecutar inmediatamente para asegurar que funcione en la carga inicial
-initializePage();
+  // Ejecutar inmediatamente
+  console.log("Ejecutando inicialización inmediata");
+  initializePage();
 </script>
-

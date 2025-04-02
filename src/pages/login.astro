@@ -1,6 +1,67 @@
 ---
+// Importar pg correctamente como módulo CommonJS
+import pkg from 'pg';
+const { Pool } = pkg;
+
+import { login } from '../lib/auth.js';
 import Layout from '../layouts/Layout.astro';
-import LoginForm from '../components/LoginForm';
+
+// Configuración de la conexión a PostgreSQL
+const pool = new Pool({
+  user: import.meta.env.DB_USER || "",
+  host: import.meta.env.DB_HOST || "",
+  database: import.meta.env.DB_NAME || "",
+  password: String(import.meta.env.DB_PASSWORD || ""),
+  port: Number.parseInt(import.meta.env.DB_PORT || "5432"),
+  ssl: import.meta.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+});
+
+let error = null;
+let success = false;
+
+// Procesar el formulario de inicio de sesión
+if (Astro.request.method === 'POST') {
+  try {
+    const formData = await Astro.request.formData();
+    const email = formData.get('email');
+    const password = formData.get('password');
+    
+    if (!email || !password) {
+      error = "Por favor, complete todos los campos";
+    } else {
+      const result = await login(email.toString(), password.toString(), pool);
+      
+      if (result.success) {
+        // Crear cookie de sesión
+        const sessionData = JSON.stringify(result.usuario);
+        const cookieOptions = "Path=/; HttpOnly; SameSite=Strict; Max-Age=86400"; // 24 horas
+        
+        // En lugar de usar Astro.redirect, configuramos la respuesta manualmente
+        success = true;
+        
+        // Establecer la cookie y redirigir usando JavaScript
+        const redirectUrl = result.redirect;
+        
+        // Nota: La redirección se manejará en el cliente con JavaScript
+        return new Response(
+          `<html><head><meta http-equiv="refresh" content="0;url=${redirectUrl}"></head><body>Redirigiendo...</body></html>`,
+          {
+            status: 200,
+            headers: {
+              'Content-Type': 'text/html',
+              'Set-Cookie': `session=${encodeURIComponent(sessionData)}; ${cookieOptions}`
+            }
+          }
+        );
+      } else {
+        error = result.error;
+      }
+    }
+  } catch (err) {
+    console.error("Error en el inicio de sesión:", err);
+    error = "Error al procesar la solicitud. Por favor, inténtelo de nuevo.";
+  }
+}
 ---
 
 <Layout title="Acceso Clientes">
@@ -12,9 +73,71 @@ import LoginForm from '../components/LoginForm';
           Ingrese sus credenciales para acceder a su cuenta
         </p>
       </div>
-      <div>
-        <LoginForm client:only="react" />
-      </div>
+      
+      {error && (
+        <div class="bg-destructive/15 text-destructive p-4 rounded-md mb-4">
+          <p>{error}</p>
+        </div>
+      )}
+      
+      {success && (
+        <div class="bg-green-100 text-green-800 p-4 rounded-md mb-4">
+          <p>Inicio de sesión exitoso. Redirigiendo...</p>
+        </div>
+      )}
+      
+      <form method="POST" class="space-y-6">
+        <div class="space-y-2">
+          <label for="email" class="block text-sm font-medium">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder="correo@ejemplo.com"
+          />
+        </div>
+        
+        <div class="space-y-2">
+          <label for="password" class="block text-sm font-medium">Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder="••••••••"
+          />
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <input
+              id="remember-me"
+              name="remember-me"
+              type="checkbox"
+              class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <label for="remember-me" class="ml-2 block text-sm">
+              Recordarme
+            </label>
+          </div>
+          
+          <div class="text-sm">
+            <a href="#" class="font-medium text-primary hover:text-primary/80">
+              ¿Olvidó su contraseña?
+            </a>
+          </div>
+        </div>
+        
+        <button
+          type="submit"
+          class="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+        >
+          Iniciar Sesión
+        </button>
+      </form>
     </div>
   </main>
 </Layout>
@@ -81,3 +204,4 @@ import LoginForm from '../components/LoginForm';
     transition: color 0.3s ease;
   }
 </style>
+

@@ -79,29 +79,54 @@ export default function ContactPage() {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setSubmitMessage("")
 
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setSubmitMessage("¡Mensaje enviado! Nos pondremos en contacto pronto.")
-
-      // Reset form after submission
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: "47fe8f90-f3f8-4f25-9050-87f4a0c96210",
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          subject: formData.subject,
+          message: formData.message,
+        }),
       })
 
-      // Clear success message after 5 seconds
+      const result = await response.json()
+
+      if (result.success) {
+        setSubmitMessage("¡Mensaje enviado! Nos pondremos en contacto pronto.")
+        // Reset form after submission
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        })
+      } else {
+        setSubmitMessage("Hubo un error al enviar el mensaje. Por favor, intente nuevamente.")
+      }
+    } catch (error) {
+      console.error("Error:", error)
+      setSubmitMessage("Hubo un error al enviar el mensaje. Por favor, intente nuevamente.")
+    } finally {
+      setIsSubmitting(false)
+
+      // Clear success/error message after 5 seconds
       setTimeout(() => {
         setSubmitMessage("")
       }, 5000)
-    }, 1500)
+    }
   }
 
   // Estilos inline para forzar los colores
@@ -329,6 +354,11 @@ export default function ContactPage() {
           )}
 
           <form onSubmit={handleSubmit}>
+            <input type="hidden" name="access_key" value="47fe8f90-f3f8-4f25-9050-87f4a0c96210" />
+            <input type="hidden" name="subject" value={formData.subject || "Nuevo mensaje de contacto"} />
+            <input type="hidden" name="from_name" value="Formulario de Contacto" />
+            <input type="checkbox" name="botcheck" className="hidden" style={{ display: "none" }} />
+
             <div className="mb-6">
               <label htmlFor="name" className="block mb-2 font-medium theme-text" style={textStyle}>
                 Nombre Completo
@@ -423,6 +453,19 @@ export default function ContactPage() {
                   color: isDarkMode ? "white" : "rgb(31, 41, 55)",
                 }}
               ></textarea>
+            </div>
+
+            <div className="mb-6" style={{ display: "none" }}>
+              <label htmlFor="botcheck" className="block mb-2 font-medium theme-text" style={textStyle}>
+                No llenar si eres humano
+              </label>
+              <input
+                type="text"
+                id="botcheck"
+                name="botcheck"
+                onChange={handleChange}
+                className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md"
+              />
             </div>
 
             <button
