@@ -1,9 +1,50 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ProjectModal from '../components/ProjectModal.jsx';
+
+// Define project data for consistency and reuse
+const projects = [
+  {
+    id: 1,
+    title: "Puente Central",
+    description: "Diseño y construcción de puente urbano. Este proyecto incluyó el análisis estructural, diseño de cimentaciones y supervisión durante la construcción. El puente conecta dos áreas urbanas importantes, mejorando significativamente el tráfico y la movilidad en la zona.",
+    image: "monumento.webp"
+  },
+  {
+    id: 2,
+    title: "Edificio Corporativo",
+    description: "Diseño estructural para edificio de oficinas. Este proyecto de 12 pisos incorpora las últimas tecnologías en diseño antisísmico y eficiencia energética. La estructura fue diseñada para optimizar los espacios de trabajo y proporcionar un ambiente moderno y funcional.",
+    image: "shop.webp"
+  },
+  {
+    id: 3,
+    title: "Sistema de Drenaje",
+    description: "Diseño e implementación de sistema de drenaje urbano. Este proyecto resolvió problemas históricos de inundaciones en un área residencial, implementando soluciones innovadoras de captación y conducción de aguas pluviales que respetan el medio ambiente.",
+    image: "/1.jpg"
+  },
+  {
+    id: 4,
+    title: "Complejo Residencial",
+    description: "Diseño estructural para complejo de apartamentos. Este desarrollo residencial incluye 120 unidades distribuidas en 5 edificios, con áreas comunes, estacionamientos subterráneos y espacios verdes. El diseño estructural garantiza seguridad y durabilidad.",
+    image: "/2.jpg"
+  },
+  {
+    id: 5,
+    title: "Carretera Regional",
+    description: "Diseño y supervisión de construcción de carretera. Este proyecto de 45 km conecta varias comunidades rurales, mejorando el acceso a servicios esenciales y fomentando el desarrollo económico de la región. Incluye puentes, sistemas de drenaje y señalización completa.",
+    image: "/3.jpg"
+  },
+  {
+    id: 6,
+    title: "Planta de Tratamiento",
+    description: "Diseño de planta de tratamiento de aguas residuales. Esta instalación procesa hasta 500,000 litros diarios, utilizando tecnologías avanzadas de tratamiento biológico y químico para devolver agua limpia al medio ambiente, cumpliendo con todas las normativas ambientales.",
+    image: "/4.jpg"
+  }
+];
 ---
 
 <Layout title="Nuestros Proyectos">
-  <section class="w-full py-12 md:py-24 lg:py-32">
+  <section class="w-full py-12 md:py-24 lg:py-32 mt-">
     <div class="container px-4 md:px-6">
       <div class="flex flex-col items-center justify-center space-y-4 text-center">
         <div class="space-y-2">
@@ -14,93 +55,31 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </div>
       <div class="grid gap-6 py-12 md:grid-cols-2 lg:grid-cols-3">
-        <div class="group relative overflow-hidden rounded-lg border">
-          <img
-            src="monumento.webp"
-            width="600"
-            height="400"
-            alt="Proyecto 1"
-            class="aspect-auto object-cover transition-transform group-hover:scale-105"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
-            <h3 class="font-bold">Puente Central</h3>
-            <p class="text-sm">Diseño y construcción de puente urbano</p>
+        {projects.map((project) => (
+          <div 
+            class="group relative overflow-hidden rounded-lg border cursor-pointer project-card" 
+            data-project-id={project.id}
+          >
+            <div class="w-full aspect-[4/3] overflow-hidden">
+              <img
+                src={project.image || "/placeholder.svg"}
+                width="600"
+                height="450"
+                alt={project.title}
+                class="w-full h-full object-cover transition-transform group-hover:scale-105"
+              />
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
+              <h3 class="font-bold">{project.title}</h3>
+              <p class="text-sm">{project.description.split('.')[0]}.</p>
+            </div>
           </div>
-        </div>
-        <div class="group relative overflow-hidden rounded-lg border">
-          <img
-            src="shop.webp"
-            width="600"
-            height="400"
-            alt="Proyecto 2"
-            class="aspect-video object-cover transition-transform group-hover:scale-105"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
-            <h3 class="font-bold">Edificio Corporativo</h3>
-            <p class="text-sm">Diseño estructural para edificio de oficinas</p>
-          </div>
-        </div>
-        <div class="group relative overflow-hidden rounded-lg border">
-          <img
-            src="/1.jpg"
-            width="600"
-            height="400"
-            alt="Proyecto 3"
-            class="aspect-video object-cover transition-transform group-hover:scale-105"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
-            <h3 class="font-bold">Sistema de Drenaje</h3>
-            <p class="text-sm">Diseño e implementación de sistema de drenaje urbano</p>
-          </div>
-        </div>
-        <div class="group relative overflow-hidden rounded-lg border">
-          <img
-            src="/2.jpg"
-            width="600"
-            height="400"
-            alt="Proyecto 4"
-            class="aspect-video object-cover transition-transform group-hover:scale-105"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
-            <h3 class="font-bold">Complejo Residencial</h3>
-            <p class="text-sm">Diseño estructural para complejo de apartamentos</p>
-          </div>
-        </div>
-        <div class="group relative overflow-hidden rounded-lg border">
-          <img
-            src="/placeholder.svg?height=400&width=600"
-            width="600"
-            height="400"
-            alt="Proyecto 5"
-            class="aspect-video object-cover transition-transform group-hover:scale-105"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
-            <h3 class="font-bold">Carretera Regional</h3>
-            <p class="text-sm">Diseño y supervisión de construcción de carretera</p>
-          </div>
-        </div>
-        <div class="group relative overflow-hidden rounded-lg border">
-          <img
-            src="/placeholder.svg?height=400&width=600"
-            width="600"
-            height="400"
-            alt="Proyecto 6"
-            class="aspect-video object-cover transition-transform group-hover:scale-105"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-          <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
-            <h3 class="font-bold">Planta de Tratamiento</h3>
-            <p class="text-sm">Diseño de planta de tratamiento de aguas residuales</p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   </section>
+  
   <section class="w-full py-12 md:py-24 lg:py-32 bg-muted">
     <div class="container px-4 md:px-6">
       <div class="flex flex-col items-center justify-center space-y-4 text-center">
@@ -168,6 +147,7 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
   </section>
+  
   <section class="w-full py-12 md:py-24 lg:py-32">
     <div class="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
       <div class="space-y-3">
@@ -185,5 +165,49 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
   </section>
+
+  <!-- Modal Component (client-side) -->
+  <ProjectModal client:load projects={projects} />
+
+  <script>
+    // Client-side script to handle modal interactions
+    document.addEventListener('astro:page-load', () => {
+      setupProjectCards();
+    });
+
+    // También ejecutar en la carga inicial del DOM para la primera visita
+    document.addEventListener('DOMContentLoaded', () => {
+      setupProjectCards();
+    });
+
+    function setupProjectCards() {
+  const projectCards = document.querySelectorAll('.project-card');
+  
+  projectCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const projectId = card.getAttribute('data-project-id');
+      // Añadir verificación y conversión segura
+      if (projectId) {
+        document.dispatchEvent(new CustomEvent('openProjectModal', { 
+          detail: { projectId: parseInt(projectId) } 
+        }));
+      }
+    });
+  });
+}
+  </script>
 </Layout>
+
+<style>
+  /* Añadimos un margen superior para compensar el header fijo */
+  section:first-child {
+    padding-top: 8rem;
+  }
+
+  @media (max-width: 768px) {
+    section:first-child {
+      padding-top: 6rem;
+    }
+  }
+</style>
 

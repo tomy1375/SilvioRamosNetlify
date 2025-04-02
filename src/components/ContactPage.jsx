@@ -155,7 +155,8 @@ export default function ContactPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 font-sans">
       <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl mb-4" style={titleStyle}>
+      <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl mt-7 sm:mt-0" style={titleStyle}>
+
           Contacto
         </h1>
         <p className="text-lg" style={subtextStyle}>
