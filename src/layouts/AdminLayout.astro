@@ -1,8 +1,6 @@
 ---
-import { ViewTransitions } from 'astro:transitions';
 import '../styles/globals.css';
 import ThemeToggle from '../components/ThemeToggle';
-import TransitionLoader from '../components/TransitionLoader';
 import AdminNavLink from '../components/AdminNavLink';
 
 interface Props {
@@ -21,7 +19,33 @@ const { title, activeLink } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title} - Panel de Administración</title>
-    <ViewTransitions />
+    
+    <!-- Estilos críticos para prevenir parpadeo -->
+    <style is:inline>
+      /* Prevenir parpadeo en transiciones */
+      html.dark {
+        background-color: #df6767 !important;
+        color-scheme: dark !important;
+      }
+      
+      html.dark body {
+        background-color: 'hsl(var(--background))' !important;
+      }
+      
+      /* Asegurar que las transiciones de página no muestren fondo blanco */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+      
+      /* Modo oscuro para las transiciones */
+      html.dark::view-transition-old(root),
+      html.dark::view-transition-new(root) {
+        background-color: #1a1a1a !important;
+      }
+    </style>
+    
     <!-- Script para prevenir el parpadeo blanco en modo oscuro -->
     <script is:inline>
       // Aplicar el tema oscuro inmediatamente si es necesario
@@ -32,11 +56,15 @@ const { title, activeLink } = Astro.props;
         if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
           document.documentElement.classList.add('dark');
           document.documentElement.style.colorScheme = 'dark';
-          // Establecer un color de fondo oscuro para el body inmediatamente
+          // Establecer un color de fondo oscuro para el body y html inmediatamente
           document.documentElement.style.backgroundColor = '#1a1a1a';
+          document.body.style.backgroundColor = '#1a1a1a';
         } else {
           document.documentElement.classList.remove('dark');
           document.documentElement.style.colorScheme = 'light';
+          // Asegurar que el fondo sea blanco en modo claro
+          document.documentElement.style.backgroundColor = '#ffffff';
+          document.body.style.backgroundColor = '#ffffff';
         }
         
         // Limpiar cualquier acción de navegación anterior al cargar una página de administración
@@ -46,9 +74,14 @@ const { title, activeLink } = Astro.props;
       })();
     </script>
   </head>
-  <body class="min-h-screen flex flex-col">
+  <body class="min-h-screen flex flex-col bg-background">
     <!-- Pantalla de carga para transiciones -->
-    <TransitionLoader client:load />
+    <div id="logout-loader" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90">
+      <div class="text-center">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+        <p class="mt-4 text-lg font-medium text-white">Cerrando sesión...</p>
+      </div>
+    </div>
 
     <header class="border-b">
       <div class="container flex h-16 items-center justify-between px-4 md:px-6">
@@ -136,45 +169,38 @@ const { title, activeLink } = Astro.props;
     </footer>
 
     <script is:inline>
-  // Script para manejar el cierre de sesión
-  function setupLogoutButton() {
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-      // Eliminar cualquier event listener anterior para evitar duplicados
-      logoutBtn.removeEventListener('click', handleLogout);
+      // Script para manejar el cierre de sesión
+      function setupLogoutButton() {
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+          // Eliminar cualquier event listener anterior para evitar duplicados
+          logoutBtn.removeEventListener('click', handleLogout);
+          
+          // Agregar el nuevo event listener
+          logoutBtn.addEventListener('click', handleLogout);
+        }
+      }
       
-      // Agregar el nuevo event listener
-      logoutBtn.addEventListener('click', handleLogout);
-    }
-  }
-  
-  function handleLogout() {
-    // Establecer la acción para el TransitionLoader
-    sessionStorage.setItem('navigationAction', 'logout');
-    sessionStorage.setItem('navigationTarget', '/login');
-    
-    // Mostrar manualmente el loader con mensaje personalizado
-    const event = new CustomEvent('showLoader', { 
-      detail: { message: 'Cerrando sesión...' } 
-    });
-    document.dispatchEvent(event);
-    
-    // Eliminar la cookie de sesión
-    document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    
-    // Pequeño retraso para asegurar que el loader se muestre
-    setTimeout(() => {
-      // Redirigir a la página de inicio de sesión
-      window.location.href = "/login";
-    }, 300);
-  }
-  
-  // Ejecutar al cargar la página
-  document.addEventListener('DOMContentLoaded', setupLogoutButton);
-  
-  // También ejecutar cuando se navega entre páginas con ViewTransitions
-  document.addEventListener('astro:page-load', setupLogoutButton);
-</script>
+      function handleLogout() {
+        // Mostrar el loader de cierre de sesión
+        const logoutLoader = document.getElementById('logout-loader');
+        if (logoutLoader) {
+          logoutLoader.classList.remove('hidden');
+        }
+        
+        // Eliminar la cookie de sesión
+        document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        
+        // Pequeño retraso para asegurar que el loader se muestre
+        setTimeout(() => {
+          // Redirigir a la página de inicio de sesión
+          window.location.href = "/login";
+        }, 300);
+      }
+      
+      // Ejecutar al cargar la página
+      document.addEventListener('DOMContentLoaded', setupLogoutButton);
+    </script>
   </body>
 </html>
 

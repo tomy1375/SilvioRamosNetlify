@@ -192,10 +192,10 @@ if (Astro.request.method === 'POST') {
     const subtitle = document.getElementById('login-subtitle');
     
     if (container) {
-      container.style.background = isDark 
-        ? 'linear-gradient(to bottom right, rgb(17, 24, 39), rgb(31, 41, 55))'
-        : 'linear-gradient(to bottom right, rgb(239, 246, 255), rgb(219, 234, 254))';
-    }
+  container.style.background = isDark 
+    ? 'hsl(var(--background))'
+    : 'linear-gradient(to bottom right, rgb(239, 246, 255), rgb(219, 234, 254))';
+}
     
     if (box) {
       box.style.backgroundColor = isDark 
