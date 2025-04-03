@@ -4,7 +4,7 @@
 /* @import "tailwindcss"; */
 
 html.dark {
-  background-color: #1a1a1a;
+  background-color: 'hsl(var(--background))';
   color-scheme: dark;
 }
 
@@ -17,7 +17,7 @@ html.dark {
 
 .dark::view-transition-old(root),
 .dark::view-transition-new(root) {
-  background-color: #1a1a1a;
+  background-color: 'hsl(var(--background))';
 }
 
 :root {
