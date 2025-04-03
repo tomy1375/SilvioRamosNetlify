@@ -2,55 +2,68 @@
 
 import { useState, useEffect } from "react"
 
-// Define the Project type
-/**
- * @typedef {Object} Project
- * @property {number} id
- * @property {string} title
- * @property {string} description
- * @property {string} image
- */
-
-/**
- * @param {Object} props
- * @param {Project[]} props.projects
- */
 export default function ProjectModal({ projects }) {
   const [isOpen, setIsOpen] = useState(false)
   const [currentProject, setCurrentProject] = useState(null)
   const [isClosing, setIsClosing] = useState(false)
 
+  // Función para bloquear el scroll
+  const lockScroll = () => {
+    // Guardar la posición actual del scroll
+    const scrollY = window.scrollY
+    
+    // Aplicar estilos para fijar el body en su posición actual
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
+    document.body.style.overflowY = 'scroll' // Mantener la barra pero deshabilitar su función
+    document.body.style.paddingRight = `${window.innerWidth - document.documentElement.clientWidth}px`
+  }
+
+  // Función para desbloquear el scroll
+  const unlockScroll = () => {
+    // Obtener la posición del scroll que teníamos antes
+    const scrollY = parseInt(document.body.style.top || '0') * -1
+    
+    // Restaurar los estilos
+    document.body.style.position = ''
+    document.body.style.top = ''
+    document.body.style.width = ''
+    document.body.style.overflowY = ''
+    document.body.style.paddingRight = ''
+    
+    // Restaurar la posición del scroll
+    window.scrollTo(0, scrollY)
+  }
+
   useEffect(() => {
-    // Listen for the custom event to open the modal
     const handleOpenModal = (event) => {
       const { projectId } = event.detail
       const project = projects.find((p) => p.id === projectId)
       if (project) {
+        // Bloquear el scroll antes de abrir el modal
+        lockScroll()
+        
         setCurrentProject(project)
         setIsOpen(true)
-        document.body.style.overflow = "hidden" // Prevent scrolling when modal is open
       }
     }
 
-    // Add event listener
     document.addEventListener("openProjectModal", handleOpenModal)
-
-    // Clean up
-    return () => {
-      document.removeEventListener("openProjectModal", handleOpenModal)
-    }
+    return () => document.removeEventListener("openProjectModal", handleOpenModal)
   }, [projects])
 
   const closeModal = () => {
     setIsClosing(true)
     setTimeout(() => {
+      // Desbloquear el scroll al cerrar el modal
+      unlockScroll()
+      
       setIsOpen(false)
       setIsClosing(false)
-      document.body.style.overflow = "" // Re-enable scrolling
     }, 300)
   }
 
-  // If modal is not open, don't render anything
   if (!isOpen) return null
 
   return (
@@ -100,7 +113,7 @@ export default function ProjectModal({ projects }) {
             </div>
 
             {/* Content Section */}
-            <div className="md:w-1/2 p-6 md:p-8 flex flex-col">
+            <div className="md:w-1/2 p-6 md:p-8 flex flex-col overflow-y-auto max-h-[80vh]">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
                 {currentProject.title}
               </h2>
@@ -124,4 +137,3 @@ export default function ProjectModal({ projects }) {
     </div>
   )
 }
-

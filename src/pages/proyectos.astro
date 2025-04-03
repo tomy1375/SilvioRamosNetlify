@@ -4,16 +4,17 @@ import ProjectModal from '../components/ProjectModal.jsx';
 
 // Define project data for consistency and reuse
 const projects = [
-  {
-    id: 1,
-    title: "Puente Central",
-    description: "Diseño y construcción de puente urbano. Este proyecto incluyó el análisis estructural, diseño de cimentaciones y supervisión durante la construcción. El puente conecta dos áreas urbanas importantes, mejorando significativamente el tráfico y la movilidad en la zona.",
-    image: "monumento.webp"
-  },
+{
+  id: 1,
+  title: "Monumento del Bicentenario Jujuy",
+  description: "Proyecto de ingeniería que integra análisis estructural y diseño de cimentación para una estructura de 30 m. Ubicada junto a la nueva terminal de ómnibus. Incorpora un sistema de iluminación inteligente para realzar su impacto urbano y cultural.",
+  image: "monumento.webp"
+},
+
   {
     id: 2,
-    title: "Edificio Corporativo",
-    description: "Diseño estructural para edificio de oficinas. Este proyecto de 12 pisos incorpora las últimas tecnologías en diseño antisísmico y eficiencia energética. La estructura fue diseñada para optimizar los espacios de trabajo y proporcionar un ambiente moderno y funcional.",
+    title: "Shopping Annuar de Jujuy",
+    description: "Proyecto integral de ingeniería y arquitectura para el diseño y construcción de un centro comercial. Incluyó análisis estructural, diseño de cimentaciones y optimización de flujos peatonales y vehiculares, impulsando la dinamización de la zona.",
     image: "shop.webp"
   },
   {
@@ -44,6 +45,8 @@ const projects = [
 ---
 
 <Layout title="Nuestros Proyectos">
+  <div id="modal-container"></div>
+  
   <section class="w-full py-12 md:py-24 lg:py-32 mt-">
     <div class="container px-4 md:px-6">
       <div class="flex flex-col items-center justify-center space-y-4 text-center">
@@ -170,7 +173,43 @@ const projects = [
   <ProjectModal client:load projects={projects} />
 
   <script>
-    // Client-side script to handle modal interactions
+    // Función para manejar el desplazamiento de la página cuando se abre el modal
+    function lockScroll() {
+      // Obtener el ancho actual del viewport
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Aplicar estilos para prevenir el desplazamiento
+      document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
+      document.documentElement.classList.add('modal-open');
+    }
+    
+    function unlockScroll() {
+      document.documentElement.classList.remove('modal-open');
+    }
+    
+    // Configurar las tarjetas de proyecto
+    function setupProjectCards() {
+      const projectCards = document.querySelectorAll('.project-card');
+      
+      projectCards.forEach(card => {
+        card.addEventListener('click', () => {
+          const projectId = card.getAttribute('data-project-id');
+          if (projectId) {
+            // Bloquear el scroll antes de abrir el modal
+            lockScroll();
+            
+            document.dispatchEvent(new CustomEvent('openProjectModal', { 
+              detail: { projectId: parseInt(projectId) } 
+            }));
+          }
+        });
+      });
+    }
+    
+    // Escuchar el evento de cierre del modal para desbloquear el scroll
+    document.addEventListener('closeProjectModal', unlockScroll);
+    
+    // Configurar las tarjetas al cargar la página
     document.addEventListener('astro:page-load', () => {
       setupProjectCards();
     });
@@ -179,22 +218,6 @@ const projects = [
     document.addEventListener('DOMContentLoaded', () => {
       setupProjectCards();
     });
-
-    function setupProjectCards() {
-  const projectCards = document.querySelectorAll('.project-card');
-  
-  projectCards.forEach(card => {
-    card.addEventListener('click', () => {
-      const projectId = card.getAttribute('data-project-id');
-      // Añadir verificación y conversión segura
-      if (projectId) {
-        document.dispatchEvent(new CustomEvent('openProjectModal', { 
-          detail: { projectId: parseInt(projectId) } 
-        }));
-      }
-    });
-  });
-}
   </script>
 </Layout>
 
@@ -209,5 +232,25 @@ const projects = [
       padding-top: 6rem;
     }
   }
+  
+  /* Estilos para manejar el modal y prevenir el desplazamiento */
+  :root {
+    --scrollbar-width: 0px;
+  }
+  
+  .modal-open {
+    overflow: hidden;
+    padding-right: var(--scrollbar-width);
+  }
+  
+  /* Asegurarse de que el contenedor del modal esté correctamente posicionado */
+  #modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 50;
+    pointer-events: none;
+  }
 </style>
-
