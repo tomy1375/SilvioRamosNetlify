@@ -15,44 +15,27 @@ export default function ContactPage() {
   const [submitMessage, setSubmitMessage] = useState("")
   const [isDarkMode, setIsDarkMode] = useState(false)
 
-  // Detectar cambios en el tema de Astro
+  // Detectar cambios en el tema de Astro - MEJORADO PARA EVITAR PARPADEOS
   useEffect(() => {
+    // Verificar el tema inicial inmediatamente desde localStorage
+    // Esto evita el parpadeo inicial al cargar la página
+    const savedTheme = localStorage.getItem("astro-theme-state") || localStorage.getItem("theme")
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+    
+    // Establecer el estado inicial basado en el tema guardado
+    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+      setIsDarkMode(true)
+    } else {
+      setIsDarkMode(false)
+    }
+    
     // Función para verificar el tema actual
     const checkTheme = () => {
       const isDark = document.documentElement.classList.contains("dark")
       setIsDarkMode(isDark)
-
-      // Forzar actualización de estilos
-      const boxes = document.querySelectorAll(".theme-box")
-      boxes.forEach((box) => {
-        if (isDark) {
-          box.style.backgroundColor = "rgb(30, 41, 59)" // slate-800
-        } else {
-          box.style.backgroundColor = "white"
-        }
-      })
-
-      // Actualizar estilos de texto
-      const textElements = document.querySelectorAll(".theme-text")
-      textElements.forEach((el) => {
-        if (isDark) {
-          el.style.color = "rgb(229, 231, 235)" // gray-200
-        } else {
-          el.style.color = "rgb(31, 41, 55)" // gray-800
-        }
-      })
-
-      const subtextElements = document.querySelectorAll(".theme-subtext")
-      subtextElements.forEach((el) => {
-        if (isDark) {
-          el.style.color = "rgb(209, 213, 219)" // gray-300
-        } else {
-          el.style.color = "rgb(55, 65, 81)" // gray-700
-        }
-      })
     }
 
-    // Verificar el tema inicial
+    // Verificar el tema después de que el DOM esté listo
     checkTheme()
 
     // Crear un observador para detectar cambios en la clase 'dark'
@@ -66,9 +49,15 @@ export default function ContactPage() {
 
     // Iniciar la observación del elemento html
     observer.observe(document.documentElement, { attributes: true })
+    
+    // Escuchar eventos de transición de Astro
+    document.addEventListener('astro:after-swap', checkTheme)
 
-    // Limpiar el observador cuando el componente se desmonte
-    return () => observer.disconnect()
+    // Limpiar el observador y los event listeners cuando el componente se desmonte
+    return () => {
+      observer.disconnect()
+      document.removeEventListener('astro:after-swap', checkTheme)
+    }
   }, [])
 
   const handleChange = (e) => {
@@ -129,49 +118,55 @@ export default function ContactPage() {
     }
   }
 
-  // Estilos inline para forzar los colores
+  // Estilos inline para forzar los colores - con transiciones más suaves
   const boxStyle = {
     backgroundColor: isDarkMode ? "rgb(30, 41, 59)" : "white",
     color: isDarkMode ? "white" : "black",
-    transition: "background-color 0.3s, color 0.3s",
+    transition: "background-color 0.5s ease, color 0.5s ease",
   }
 
   const titleStyle = {
     color: isDarkMode ? "white" : "rgb(17, 24, 39)", // gray-900 en modo claro
     fontWeight: "bold",
-    transition: "color 0.3s",
+    transition: "color 0.5s ease",
   }
 
   const textStyle = {
     color: isDarkMode ? "rgb(229, 231, 235)" : "rgb(31, 41, 55)", // gray-200 en oscuro, gray-800 en claro
-    transition: "color 0.3s",
+    transition: "color 0.5s ease",
   }
 
   const subtextStyle = {
     color: isDarkMode ? "rgb(209, 213, 219)" : "rgb(55, 65, 81)", // gray-300 en oscuro, gray-700 en claro
-    transition: "color 0.3s",
+    transition: "color 0.5s ease",
+  }
+
+  const inputStyle = {
+    backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
+    color: isDarkMode ? "white" : "rgb(31, 41, 55)",
+    borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(209, 213, 219)",
+    transition: "background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease",
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 font-sans">
+    <div className="max-w-7xl mx-auto px-4 py-8 font-sans transition-all duration-500">
       <div className="text-center mb-12">
-      <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl mt-7 sm:mt-0" style={titleStyle}>
-
+        <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl mt-7 sm:mt-0" style={titleStyle}>
           Contacto
         </h1>
-        <p className="text-lg" style={subtextStyle}>
+        <p className="text-lg mt-3max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-2" >
           Estamos listos para ayudarte con tu próximo proyecto de ingeniería civil
         </p>
       </div>
 
       <div className="flex flex-wrap gap-8 mb-12">
-        <div className="flex-1 min-w-[300px] p-8 rounded-lg shadow-md theme-box" style={boxStyle}>
+        <div className="flex-1 min-w-[300px] p-8 rounded-lg shadow-md transition-all duration-500" style={boxStyle}>
           <h2 className="text-2xl font-bold mb-6" style={titleStyle}>
             Información de Contacto
           </h2>
 
           <div className="flex mb-6">
-            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center">
+            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -187,17 +182,17 @@ export default function ContactPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium mb-1 theme-text" style={textStyle}>
+              <h3 className="font-medium mb-1" style={textStyle}>
                 Teléfono
               </h3>
-              <p className="theme-subtext" style={subtextStyle}>
+              <p style={subtextStyle}>
                 +54 388 123 4567
               </p>
             </div>
           </div>
 
           <div className="flex mb-6">
-            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center">
+            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -214,17 +209,17 @@ export default function ContactPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium mb-1 theme-text" style={textStyle}>
+              <h3 className="font-medium mb-1" style={textStyle}>
                 Email
               </h3>
-              <p className="theme-subtext" style={subtextStyle}>
+              <p style={subtextStyle}>
                 contacto@ingenieriacivil.com
               </p>
             </div>
           </div>
 
           <div className="flex mb-6">
-            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center">
+            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -241,10 +236,10 @@ export default function ContactPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium mb-1 theme-text" style={textStyle}>
+              <h3 className="font-medium mb-1" style={textStyle}>
                 Dirección
               </h3>
-              <p className="theme-subtext" style={subtextStyle}>
+              <p style={subtextStyle}>
                 Remedios de Escalada 193
                 <br />
                 Y4600 San Salvador de Jujuy, Jujuy
@@ -253,7 +248,7 @@ export default function ContactPage() {
           </div>
 
           <div className="flex mb-6">
-            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center">
+            <div className="mr-4 text-blue-500 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -270,10 +265,10 @@ export default function ContactPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium mb-1 theme-text" style={textStyle}>
+              <h3 className="font-medium mb-1" style={textStyle}>
                 Horario
               </h3>
-              <p className="theme-subtext" style={subtextStyle}>
+              <p style={subtextStyle}>
                 Lunes - Viernes: 9:00 - 18:00
                 <br />
                 Sábado: 10:00 - 14:00
@@ -343,13 +338,13 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className="flex-[2] min-w-[300px] p-8 rounded-lg shadow-md theme-box" style={boxStyle}>
+        <div className="flex-[2] min-w-[300px] p-8 rounded-lg shadow-md transition-all duration-500" style={boxStyle}>
           <h2 className="text-2xl font-bold mb-6" style={titleStyle}>
             Envíanos un Mensaje
           </h2>
 
           {submitMessage && (
-            <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 p-4 rounded-md mb-6 text-center">
+            <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 p-4 rounded-md mb-6 text-center transition-colors duration-500">
               {submitMessage}
             </div>
           )}
@@ -361,7 +356,7 @@ export default function ContactPage() {
             <input type="checkbox" name="botcheck" className="hidden" style={{ display: "none" }} />
 
             <div className="mb-6">
-              <label htmlFor="name" className="block mb-2 font-medium theme-text" style={textStyle}>
+              <label htmlFor="name" className="block mb-2 font-medium" style={textStyle}>
                 Nombre Completo
               </label>
               <input
@@ -371,17 +366,14 @@ export default function ContactPage() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                style={{
-                  backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
-                  color: isDarkMode ? "white" : "rgb(31, 41, 55)",
-                }}
+                className="w-full px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-500"
+                style={inputStyle}
               />
             </div>
 
             <div className="flex flex-wrap gap-4 mb-6">
               <div className="flex-1 min-w-[200px]">
-                <label htmlFor="email" className="block mb-2 font-medium theme-text" style={textStyle}>
+                <label htmlFor="email" className="block mb-2 font-medium" style={textStyle}>
                   Email
                 </label>
                 <input
@@ -391,16 +383,13 @@ export default function ContactPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  style={{
-                    backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
-                    color: isDarkMode ? "white" : "rgb(31, 41, 55)",
-                  }}
+                  className="w-full px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-500"
+                  style={inputStyle}
                 />
               </div>
 
               <div className="flex-1 min-w-[200px]">
-                <label htmlFor="phone" className="block mb-2 font-medium theme-text" style={textStyle}>
+                <label htmlFor="phone" className="block mb-2 font-medium" style={textStyle}>
                   Teléfono
                 </label>
                 <input
@@ -409,17 +398,14 @@ export default function ContactPage() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  style={{
-                    backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
-                    color: isDarkMode ? "white" : "rgb(31, 41, 55)",
-                  }}
+                  className="w-full px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-500"
+                  style={inputStyle}
                 />
               </div>
             </div>
 
             <div className="mb-6">
-              <label htmlFor="subject" className="block mb-2 font-medium theme-text" style={textStyle}>
+              <label htmlFor="subject" className="block mb-2 font-medium" style={textStyle}>
                 Asunto
               </label>
               <input
@@ -429,16 +415,13 @@ export default function ContactPage() {
                 value={formData.subject}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                style={{
-                  backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
-                  color: isDarkMode ? "white" : "rgb(31, 41, 55)",
-                }}
+                className="w-full px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-500"
+                style={inputStyle}
               />
             </div>
 
             <div className="mb-6">
-              <label htmlFor="message" className="block mb-2 font-medium theme-text" style={textStyle}>
+              <label htmlFor="message" className="block mb-2 font-medium" style={textStyle}>
                 Mensaje
               </label>
               <textarea
@@ -448,16 +431,13 @@ export default function ContactPage() {
                 value={formData.message}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                style={{
-                  backgroundColor: isDarkMode ? "rgb(51, 65, 85)" : "white",
-                  color: isDarkMode ? "white" : "rgb(31, 41, 55)",
-                }}
+                className="w-full px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-500"
+                style={inputStyle}
               ></textarea>
             </div>
 
             <div className="mb-6" style={{ display: "none" }}>
-              <label htmlFor="botcheck" className="block mb-2 font-medium theme-text" style={textStyle}>
+              <label htmlFor="botcheck" className="block mb-2 font-medium" style={textStyle}>
                 No llenar si eres humano
               </label>
               <input
@@ -465,13 +445,13 @@ export default function ContactPage() {
                 id="botcheck"
                 name="botcheck"
                 onChange={handleChange}
-                className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md"
+                className="w-full px-3 py-3 border rounded-md"
               />
             </div>
 
             <button
               type="submit"
-              className={`w-full py-3 px-6 rounded-md font-semibold text-white transition-colors ${
+              className={`w-full py-3 px-6 rounded-md font-semibold text-white transition-all duration-500 ${
                 isSubmitting
                   ? "bg-gray-500 dark:bg-gray-600 cursor-not-allowed"
                   : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
@@ -488,7 +468,7 @@ export default function ContactPage() {
         <h2 className="text-2xl font-bold mb-6 text-center" style={titleStyle}>
           Nuestra Ubicación
         </h2>
-        <div className="rounded-lg overflow-hidden shadow-md">
+        <div className="rounded-lg overflow-hidden shadow-md transition-all duration-500">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d467.0304553374726!2d-65.31090980000001!3d-24.177588!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x941b0f135d53d4ab%3A0x2c760e0263ce334a!2sRemedios%20de%20Escalada%20193%2C%20Y4600%20San%20Salvador%20de%20Jujuy%2C%20Jujuy!5e0!3m2!1ses!2sar!4v1711644405000!5m2!1ses!2sar"
             width="100%"
@@ -497,11 +477,10 @@ export default function ContactPage() {
             allowFullScreen=""
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            className="dark:opacity-90"
+            className="dark:opacity-90 transition-opacity duration-500"
           ></iframe>
         </div>
       </div>
     </div>
   )
 }
-
