@@ -5,66 +5,111 @@ const { Pool } = pkg;
 
 import { login } from '../lib/auth.js';
 import Layout from '../layouts/Layout.astro';
+import TransitionLoader from '../components/TransitionLoader';
 
 // Configuración de la conexión a PostgreSQL
 const pool = new Pool({
-  user: import.meta.env.DB_USER || "",
-  host: import.meta.env.DB_HOST || "",
-  database: import.meta.env.DB_NAME || "",
-  password: String(import.meta.env.DB_PASSWORD || ""),
-  port: Number.parseInt(import.meta.env.DB_PORT || "5432"),
-  ssl: import.meta.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+ user: import.meta.env.DB_USER || "",
+ host: import.meta.env.DB_HOST || "",
+ database: import.meta.env.DB_NAME || "",
+ password: String(import.meta.env.DB_PASSWORD || ""),
+ port: Number.parseInt(import.meta.env.DB_PORT || "5432"),
+ ssl: import.meta.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
 });
 
+// Cambiar la declaración de redirectUrl para aceptar undefined
 let error = null;
-let success = false;
+let redirectUrl: string | undefined = '';
 
 // Procesar el formulario de inicio de sesión
 if (Astro.request.method === 'POST') {
-  try {
-    const formData = await Astro.request.formData();
-    const email = formData.get('email');
-    const password = formData.get('password');
-    
-    if (!email || !password) {
-      error = "Por favor, complete todos los campos";
-    } else {
-      const result = await login(email.toString(), password.toString(), pool);
-      
-      if (result.success) {
-        // Crear cookie de sesión
-        const sessionData = JSON.stringify(result.usuario);
-        const cookieOptions = "Path=/; HttpOnly; SameSite=Strict; Max-Age=86400"; // 24 horas
+ try {
+   const formData = await Astro.request.formData();
+   const email = formData.get('email');
+   const password = formData.get('password');
+   
+   if (!email || !password) {
+     error = "Por favor, complete todos los campos";
+   } else {
+     const result = await login(email.toString(), password.toString(), pool);
+     
+     // Más abajo, donde se asigna redirectUrl, asegurarnos de que no sea undefined
+     if (result.success) {
+       // Crear cookie de sesión
+       const sessionData = JSON.stringify(result.usuario);
+       const cookieOptions = "Path=/; HttpOnly; SameSite=Strict; Max-Age=86400"; // 24 horas
+       
+       // Usar un valor predeterminado si redirect es undefined
+       redirectUrl = result.redirect || '/cliente';
+       
+       // Establecer la cookie y redirigir usando JavaScript
+       return new Response(
+         `<html>
+    <head>
+      <meta http-equiv="refresh" content="0;url=${redirectUrl}">
+      <script>
+        // Establecer el mensaje para el TransitionLoader
+        sessionStorage.setItem('navigationAction', 'login');
+        sessionStorage.setItem('navigationTarget', '${redirectUrl}');
         
-        // En lugar de usar Astro.redirect, configuramos la respuesta manualmente
-        success = true;
-        
-        // Establecer la cookie y redirigir usando JavaScript
-        const redirectUrl = result.redirect;
-        
-        // Nota: La redirección se manejará en el cliente con JavaScript
-        return new Response(
-          `<html><head><meta http-equiv="refresh" content="0;url=${redirectUrl}"></head><body>Redirigiendo...</body></html>`,
-          {
-            status: 200,
-            headers: {
-              'Content-Type': 'text/html',
-              'Set-Cookie': `session=${encodeURIComponent(sessionData)}; ${cookieOptions}`
-            }
+        // Aplicar el tema oscuro inmediatamente si es necesario
+        (function() {
+          const savedTheme = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          
+          if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+            document.documentElement.style.backgroundColor = '#1a1a1a';
           }
-        );
-      } else {
-        error = result.error;
-      }
-    }
-  } catch (err) {
-    console.error("Error en el inicio de sesión:", err);
-    error = "Error al procesar la solicitud. Por favor, inténtelo de nuevo.";
-  }
+        })();
+        
+        // Mostrar el loader con mensaje específico
+        document.addEventListener('DOMContentLoaded', function() {
+          const event = new CustomEvent('showLoader', { 
+            detail: { message: 'Iniciando sesión...' } 
+          });
+          document.dispatchEvent(event);
+        });
+      </script>
+    </head>
+    <body style="visibility: hidden; background-color: #1a1a1a;">
+      <div id="loader" style="position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background-color: rgba(17, 24, 39, 0.9); visibility: visible;">
+        <div style="text-align: center;">
+          <div style="display: inline-block; width: 3rem; height: 3rem; border-radius: 9999px; border: 4px solid; border-color: #0284c7; border-top-color: transparent; animation: spin 1s linear infinite;"></div>
+          <p style="margin-top: 1rem; font-size: 1.125rem; font-weight: 500; color: white;">Iniciando sesión...</p>
+        </div>
+      </div>
+      <style>
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      </style>
+    </body>
+  </html>`,
+         {
+           status: 200,
+           headers: {
+             'Content-Type': 'text/html',
+             'Set-Cookie': `session=${encodeURIComponent(sessionData)}; ${cookieOptions}`
+           }
+         }
+       );
+     } else {
+       error = result.error;
+     }
+   }
+ } catch (err) {
+   console.error("Error en el inicio de sesión:", err);
+   error = "Error al procesar la solicitud. Por favor, inténtelo de nuevo.";
+ }
 }
 ---
 
 <Layout title="Acceso Clientes">
+  <!-- Incluir el TransitionLoader aquí para asegurarnos de que esté disponible -->
+  <TransitionLoader client:load />
+  
   <main id="login-container" class="min-h-screen flex items-center justify-center py-12">
     <div id="login-box" class="backdrop-blur-sm shadow-xl rounded-2xl p-12 max-w-md w-full space-y-8">
       <div class="text-center space-y-4">
@@ -80,13 +125,7 @@ if (Astro.request.method === 'POST') {
         </div>
       )}
       
-      {success && (
-        <div class="bg-green-100 text-green-800 p-4 rounded-md mb-4">
-          <p>Inicio de sesión exitoso. Redirigiendo...</p>
-        </div>
-      )}
-      
-      <form method="POST" class="space-y-6">
+      <form id="loginForm" method="POST" class="space-y-6">
         <div class="space-y-2">
           <label for="email" class="block text-sm font-medium">Email</label>
           <input
@@ -133,6 +172,7 @@ if (Astro.request.method === 'POST') {
         
         <button
           type="submit"
+          id="submitBtn"
           class="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
         >
           Iniciar Sesión
@@ -153,13 +193,13 @@ if (Astro.request.method === 'POST') {
     
     if (container) {
       container.style.background = isDark 
-        ? 'linear-gradient(to bottom right, rgb(15, 23, 42), rgb(30, 41, 59))' 
+        ? 'linear-gradient(to bottom right, rgb(17, 24, 39), rgb(31, 41, 55))'
         : 'linear-gradient(to bottom right, rgb(239, 246, 255), rgb(219, 234, 254))';
     }
     
     if (box) {
       box.style.backgroundColor = isDark 
-        ? 'rgba(30, 41, 59, 0.95)' 
+        ? 'rgba(31, 41, 55, 0.95)' 
         : 'rgba(255, 255, 255, 0.95)';
     }
     
@@ -173,7 +213,37 @@ if (Astro.request.method === 'POST') {
   }
   
   // Ejecutar al cargar la página
-  document.addEventListener('DOMContentLoaded', updateLoginStyles);
+  document.addEventListener('DOMContentLoaded', () => {
+    updateLoginStyles();
+    
+    // Configurar el formulario de inicio de sesión
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (loginForm && submitBtn) {
+      loginForm.addEventListener('submit', (e) => {
+        // No prevenimos el envío del formulario, pero configuramos el mensaje
+        
+        // Establecer el mensaje para TransitionLoader
+        sessionStorage.setItem('navigationAction', 'login');
+        
+        // Mostrar manualmente el loader con un mensaje específico
+        const event = new CustomEvent('showLoader', { 
+          detail: { message: 'Iniciando sesión...' } 
+        });
+        document.dispatchEvent(event);
+        
+        console.log("Evento showLoader disparado con mensaje: Iniciando sesión...");
+        
+        // Ocultar cualquier texto que pueda aparecer durante la redirección
+        document.body.style.visibility = 'hidden';
+        const loaderElement = document.querySelector('.fixed');
+        if (loaderElement && loaderElement instanceof HTMLElement) {
+          loaderElement.style.visibility = 'visible'; // Mantener visible solo el loader
+        }
+      });
+    }
+  });
   
   // Observar cambios en la clase 'dark' del elemento html
   const observer = new MutationObserver((mutations) => {

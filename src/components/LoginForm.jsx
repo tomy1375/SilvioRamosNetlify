@@ -13,6 +13,20 @@ export default function LoginForm() {
     setIsLoading(true)
     setError("")
 
+    // Limpiar cualquier estado de navegación anterior
+    sessionStorage.removeItem("navigationAction")
+    sessionStorage.removeItem("navigationTarget")
+
+    // Establecer la acción para el TransitionLoader
+    sessionStorage.setItem("navigationAction", "login")
+    sessionStorage.setItem("navigationTarget", "/admin")
+
+    // Mostrar manualmente el loader con mensaje personalizado
+    const showLoaderEvent = new CustomEvent("showLoader", {
+      detail: { message: "Iniciando sesión..." },
+    })
+    document.dispatchEvent(showLoaderEvent)
+
     try {
       const formData = new FormData()
       formData.append("email", email)
@@ -32,6 +46,7 @@ export default function LoginForm() {
         // Buscar la URL de redirección en el meta refresh
         const redirectMatch = html.match(/content="0;url=([^"]+)"/)
         if (redirectMatch && redirectMatch[1]) {
+          // Mantener el estado de navegación para la redirección
           window.location.href = redirectMatch[1]
           return
         }
@@ -42,8 +57,18 @@ export default function LoginForm() {
         )
         if (errorMatch && errorMatch[1]) {
           setError(errorMatch[1])
+          // Ocultar el loader en caso de error
+          document.dispatchEvent(new Event("hideLoader"))
+          // Limpiar el estado de navegación en caso de error
+          sessionStorage.removeItem("navigationAction")
+          sessionStorage.removeItem("navigationTarget")
         } else {
           setError("Error al iniciar sesión. Por favor, inténtelo de nuevo.")
+          // Ocultar el loader en caso de error
+          document.dispatchEvent(new Event("hideLoader"))
+          // Limpiar el estado de navegación en caso de error
+          sessionStorage.removeItem("navigationAction")
+          sessionStorage.removeItem("navigationTarget")
         }
       } else {
         // Si no es HTML, intentar parsear como JSON
@@ -51,16 +76,32 @@ export default function LoginForm() {
           const data = await response.json()
           if (data.error) {
             setError(data.error)
+            // Ocultar el loader en caso de error
+            document.dispatchEvent(new Event("hideLoader"))
+            // Limpiar el estado de navegación en caso de error
+            sessionStorage.removeItem("navigationAction")
+            sessionStorage.removeItem("navigationTarget")
           } else if (response.redirected) {
+            // Mantener el estado de navegación para la redirección
             window.location.href = response.url
           }
         } catch (e) {
           setError("Error al procesar la respuesta del servidor.")
+          // Ocultar el loader en caso de error
+          document.dispatchEvent(new Event("hideLoader"))
+          // Limpiar el estado de navegación en caso de error
+          sessionStorage.removeItem("navigationAction")
+          sessionStorage.removeItem("navigationTarget")
         }
       }
     } catch (err) {
       console.error("Error al iniciar sesión:", err)
       setError("Error al procesar la solicitud. Por favor, inténtelo de nuevo.")
+      // Ocultar el loader en caso de error
+      document.dispatchEvent(new Event("hideLoader"))
+      // Limpiar el estado de navegación en caso de error
+      sessionStorage.removeItem("navigationAction")
+      sessionStorage.removeItem("navigationTarget")
     } finally {
       setIsLoading(false)
     }

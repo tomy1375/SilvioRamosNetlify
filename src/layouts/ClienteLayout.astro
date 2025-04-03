@@ -1,7 +1,8 @@
 ---
 import ClienteNavbar from '../components/ClienteNavbar.astro';
+import TransitionLoader from '../components/TransitionLoader';
 import { isAuthenticated } from '../lib/auth.js';
-import '../styles/globals.css';
+
 // Obtener el usuario autenticado
 const usuario = isAuthenticated(Astro.request);
 
@@ -15,56 +16,46 @@ const { title, activeLink } = Astro.props;
 
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{title} - Gestión de Planos</title>
-  <!-- No es necesario incluir <link rel="stylesheet" href="../styles/globals.css"> aquí -->
-</head>
-<body class="min-h-screen bg-background">
-  <ClienteNavbar activeLink={activeLink} />
-  
-  <main class="container py-6">
-    <slot />
-  </main>
-  
-  <footer class="border-t py-6 md:py-0">
-    <div class="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row">
-      <p class="text-sm text-muted-foreground">
-        &copy; {new Date().getFullYear()} Gestión de Planos. Todos los derechos reservados.
-      </p>
-    </div>
-  </footer>
-
-  <script is:inline>
-    // Script para manejar el tema
-    function handleTheme() {
-      // Verificar si hay una preferencia guardada
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
-      // Establecer el tema inicial
-      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      
-      // Configurar el botón de cambio de tema
-      const themeToggle = document.getElementById('theme-toggle');
-      if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
-          const isDark = document.documentElement.classList.toggle('dark');
-          localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        });
-      }
-    }
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Gestión de Planos</title>
+    <!-- Script para prevenir el parpadeo blanco en modo oscuro -->
+    <script is:inline>
+      // Aplicar el tema oscuro inmediatamente si es necesario
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
+          // Establecer un color de fondo oscuro para el body inmediatamente
+          document.documentElement.style.backgroundColor = '#1a1a1a';
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.style.colorScheme = 'light';
+        }
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen bg-background">
+    <!-- Pantalla de carga para transiciones -->
+    <TransitionLoader client:load />
     
-    // Ejecutar al cargar la página
-    document.addEventListener('DOMContentLoaded', handleTheme);
+    <ClienteNavbar activeLink={activeLink} />
     
-    // También ejecutar inmediatamente para evitar parpadeos
-    handleTheme();
-  </script>
-</body>
+    <main class="container py-6">
+      <slot />
+    </main>
+    
+    <footer class="border-t py-6 md:py-0">
+      <div class="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row">
+        <p class="text-sm text-muted-foreground">
+          &copy; {new Date().getFullYear()} Gestión de Planos. Todos los derechos reservados.
+        </p>
+      </div>
+    </footer>
+  </body>
 </html>
+

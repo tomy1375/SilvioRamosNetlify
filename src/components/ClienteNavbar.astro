@@ -7,8 +7,8 @@ const usuario = isAuthenticated(Astro.request);
 
 // Definir los enlaces de navegación
 const links = [
-  { href: '/cliente', text: 'Mis Planos', active: 'planos' },
-  { href: '/cliente/historial', text: 'Historial', active: 'historial' },
+ { href: '/cliente', text: 'Mis Planos', active: 'planos' },
+ { href: '/cliente/historial', text: 'Historial', active: 'historial' },
 ];
 
 // Obtener el enlace activo
@@ -16,86 +16,100 @@ const { activeLink } = Astro.props;
 ---
 
 <header class="sticky top-0 z-40 w-full border-b bg-background">
-  <div class="container flex h-16 items-center justify-between">
-    <div class="flex items-center gap-2">
-      <a href="/cliente" class="font-bold text-xl">Gestión de Planos</a>
-    </div>
-    
-    <nav class="flex items-center gap-6">
-      <div class="hidden md:flex gap-6">
-        {links.map(link => (
-          <a 
-            href={link.href} 
-            class={`text-sm font-medium transition-colors hover:text-primary ${activeLink === link.active ? 'text-primary' : 'text-muted-foreground'}`}
-          >
-            {link.text}
-          </a>
-        ))}
-      </div>
-      
-      {usuario && (
-        <div class="flex items-center gap-4">
-          <!-- Usar el ThemeToggle para el cambio de tema -->
-          <ThemeToggle client:load />
-          
-          <!-- Menú de usuario -->
-          <div class="relative">
-            <button 
-              id="userMenuBtn"
-              class="flex items-center gap-2 rounded-full text-sm font-medium transition-colors hover:text-primary"
-            >
-              <span>{usuario.nombre}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                <path d="m6 9 6 6 6-6"></path>
-              </svg>
-            </button>
-            
-            <div id="userMenu" class="absolute right-0 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden dark:bg-gray-800">
-              <div class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-                <div class="font-medium">{usuario.nombre}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">{usuario.email}</div>
-              </div>
-              <div class="border-t border-gray-100 dark:border-gray-700"></div>
-              <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">Cerrar sesión</a>
-            </div>
-          </div>
-        </div>
-      )}
-    </nav>
-  </div>
+ <div class="container flex h-16 items-center justify-between">
+   <div class="flex items-center gap-2">
+     <a href="/cliente" class="font-bold text-xl">Gestión de Planos</a>
+   </div>
+   
+   <nav class="flex items-center gap-6">
+     <div class="hidden md:flex gap-6">
+       {links.map(link => (
+         <a 
+           href={link.href} 
+           class={`text-sm font-medium transition-colors hover:text-primary ${activeLink === link.active ? 'text-primary' : 'text-muted-foreground'}`}
+         >
+           {link.text}
+         </a>
+       ))}
+     </div>
+     
+     {usuario && (
+       <div class="flex items-center gap-4">
+         <!-- Usar el ThemeToggle para el cambio de tema -->
+         <ThemeToggle client:load />
+         
+         <!-- Menú de usuario -->
+         <div class="relative">
+           <button 
+             id="userMenuBtn"
+             class="flex items-center gap-2 rounded-full text-sm font-medium transition-colors hover:text-primary"
+           >
+             <span>{usuario.nombre}</span>
+             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+               <path d="m6 9 6 6 6-6"></path>
+             </svg>
+           </button>
+           
+           <div id="userMenu" class="absolute right-0 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden dark:bg-gray-800">
+             <div class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+               <div class="font-medium">{usuario.nombre}</div>
+               <div class="text-xs text-gray-500 dark:text-gray-400">{usuario.email}</div>
+             </div>
+             <div class="border-t border-gray-100 dark:border-gray-700"></div>
+             <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">Cerrar sesión</button>
+           </div>
+         </div>
+       </div>
+     )}
+   </nav>
+ </div>
 </header>
 
 <script is:inline>
-  // Manejar el menú de usuario
-  const userMenuBtn = document.getElementById('userMenuBtn');
-  const userMenu = document.getElementById('userMenu');
-  const logoutBtn = document.getElementById('logoutBtn');
-  
-  if (userMenuBtn && userMenu) {
-    userMenuBtn.addEventListener('click', () => {
-      userMenu.classList.toggle('hidden');
-    });
-    
-    // Cerrar el menú al hacer clic fuera de él
-    document.addEventListener('click', (event) => {
-      if (userMenuBtn && userMenu && event.target instanceof Node) {
-        if (!userMenuBtn.contains(event.target) && !userMenu.contains(event.target)) {
-          userMenu.classList.add('hidden');
-        }
-      }
-    });
-  }
-  
-  // Manejar el cierre de sesión
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      
-      // Eliminar la cookie de sesión
-      document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      
-      // Redirigir a la página de inicio de sesión
-      window.location.href = "/login";
-    });
-  }
+ // Manejar el menú de usuario
+ const userMenuBtn = document.getElementById('userMenuBtn');
+ const userMenu = document.getElementById('userMenu');
+ const logoutBtn = document.getElementById('logoutBtn');
+ 
+ if (userMenuBtn && userMenu) {
+   userMenuBtn.addEventListener('click', () => {
+     userMenu.classList.toggle('hidden');
+   });
+   
+   // Cerrar el menú al hacer clic fuera de él
+   document.addEventListener('click', (event) => {
+     if (userMenuBtn && userMenu && event.target instanceof Node) {
+       if (!userMenuBtn.contains(event.target) && !userMenu.contains(event.target)) {
+         userMenu.classList.add('hidden');
+       }
+     }
+   });
+ }
+ 
+ // Manejar el cierre de sesión
+ if (logoutBtn) {
+   logoutBtn.addEventListener('click', (e) => {
+     e.preventDefault();
+     
+     // Establecer la acción para el TransitionLoader
+     sessionStorage.setItem('navigationAction', 'logout');
+     sessionStorage.setItem('navigationTarget', '/login');
+     
+     // Mostrar manualmente el loader con mensaje personalizado
+     const event = new CustomEvent('showLoader', { 
+       detail: { message: 'Cerrando sesión...' } 
+     });
+     document.dispatchEvent(event);
+     
+     // Eliminar la cookie de sesión
+     document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+     
+     // Pequeño retraso para asegurar que el loader se muestre
+     setTimeout(() => {
+       // Redirigir a la página de inicio de sesión
+       window.location.href = "/login";
+     }, 300);
+   });
+ }
 </script>
+
