@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"  # Reemplaza con tu comando de build
+  publish = "dist"           # Reemplaza con tu directorio de salida
+
+[functions]
+  node_bundler = "esbuild"
+
+[dev]
+  command = "npm run dev"    # Reemplaza con tu comando de desarrollo
