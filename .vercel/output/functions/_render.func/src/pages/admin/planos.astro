@@ -1,0 +1,379 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getPlanos } from '../../lib/db.js';
+// Definir la interfaz para los planos
+interface Plano {
+  id: number;
+  nombre: string;
+  tipo: string;
+  fecha_subida: string;
+  archivo_url: string;
+  usuario_id: number;
+  cliente_nombre?: string;
+  descripcion?: string;
+}
+
+// Obtener los planos de la base de datos
+let planos: Plano[] = [];
+try {
+  const result = await getPlanos();
+  planos = result;
+} catch (error) {
+  console.error("Error al obtener planos:", error);
+}
+---
+
+<AdminLayout title="Gestión de Planos" activeLink="planos">
+<div class="flex flex-col gap-6">
+  <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-2xl font-bold tracking-tight">Gestión de Planos</h1>
+      <p class="text-muted-foreground">
+        Administre los planos disponibles para los clientes.
+      </p>
+    </div>
+    <a href="/admin/subir" class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      Subir Plano
+    </a>
+  </div>
+
+  <!-- Filtros de búsqueda -->
+  <div class="rounded-lg border shadow-sm p-4">
+    <div class="flex flex-col md:flex-row gap-4">
+      <div class="flex-1">
+        <label for="buscarNombre" class="text-sm font-medium mb-1 block">Buscar por nombre de plano</label>
+        <input 
+          type="text" 
+          id="buscarNombre" 
+          placeholder="Nombre del plano..." 
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      </div>
+      <div class="flex-1">
+        <label for="buscarCliente" class="text-sm font-medium mb-1 block">Buscar por nombre de cliente</label>
+        <input 
+          type="text" 
+          id="buscarCliente" 
+          placeholder="Nombre del cliente..." 
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        />
+      </div>
+      <div class="flex-1">
+        <label for="filtrarTipo" class="text-sm font-medium mb-1 block">Filtrar por tipo</label>
+        <select 
+          id="filtrarTipo" 
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <option value="">Todos los tipos</option>
+          <option value="Arquitectónico">Arquitectónico</option>
+          <option value="Estructural">Estructural</option>
+          <option value="Eléctrico">Eléctrico</option>
+          <option value="Hidráulico">Hidráulico</option>
+          <option value="Sanitario">Sanitario</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-lg border shadow-sm">
+    <div class="p-4">
+      {planos.length === 0 ? (
+        <div class="text-center py-8">
+          <p class="text-muted-foreground">No hay planos disponibles. Sube tu primer plano.</p>
+        </div>
+      ) : (
+        <div class="relative w-full overflow-auto">
+          <table class="w-full caption-bottom text-sm">
+            <thead class="[&_tr]:border-b">
+              <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Nombre</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Cliente</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Tipo</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Fecha Subida</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="planosTableBody" class="[&_tr:last-child]:border-0">
+              {planos.map((plano) => (
+                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted plano-row" 
+                    data-nombre={plano.nombre.toLowerCase()} 
+                    data-cliente={plano.cliente_nombre ? plano.cliente_nombre.toLowerCase() : ''} 
+                    data-tipo={plano.tipo.toLowerCase()}
+                    data-id={plano.id.toString()}>
+                  <td class="p-4 align-middle">{plano.nombre}</td>
+                  <td class="p-4 align-middle">{plano.cliente_nombre || `ID: ${plano.usuario_id}`}</td>
+                  <td class="p-4 align-middle">{plano.tipo}</td>
+                  <td class="p-4 align-middle">{new Date(plano.fecha_subida).toLocaleDateString()}</td>
+                  <td class="p-4 align-middle">
+                    <div class="flex gap-2">
+                      <a 
+                        href={plano.archivo_url} 
+                        target="_blank" 
+                        class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        Ver
+                      </a>
+                      <a 
+                        href={`/admin/editar-plano/${plano.id}`}
+                        class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        Editar
+                      </a>
+                      <button 
+                        type="button"
+                        class="eliminar-plano inline-flex h-9 items-center justify-center rounded-md bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground shadow-sm hover:bg-destructive/90"
+                        data-id={plano.id.toString()}
+                        data-nombre={plano.nombre}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          
+          <!-- Mensaje cuando no hay resultados de búsqueda -->
+          <div id="noResultados" class="hidden text-center py-8">
+            <p class="text-muted-foreground">No se encontraron planos que coincidan con los criterios de búsqueda.</p>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+</AdminLayout>
+
+<script>
+  import Swal from "sweetalert2";
+
+  // Definir interfaces para TypeScript
+  interface DeleteButton extends HTMLButtonElement {
+    getAttribute(name: string): string | null;
+    closest<E extends Element = Element>(selector: string): E | null;
+  }
+
+  interface FilterInput extends HTMLInputElement {
+    value: string;
+  }
+
+  interface FilterSelect extends HTMLSelectElement {
+    value: string;
+  }
+
+  // Función para cargar estilos de SweetAlert2
+  function cargarEstilosSweetAlert(): void {
+    if (!document.querySelector('link[href*="sweetalert2.min.css"]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css';
+      document.head.appendChild(link);
+      console.log("Estilos de SweetAlert2 cargados.");
+    }
+  }
+
+  // Configurar botones de eliminar
+  function setupDeleteButtons(): void {
+    console.log("Configurando botones de eliminar para planos...");
+    const deleteButtons = document.querySelectorAll<DeleteButton>('.eliminar-plano');
+    
+    deleteButtons.forEach(function(boton) {
+      // Crear un nuevo botón en lugar de clonar para evitar problemas de referencia
+      const newButton = document.createElement('button') as DeleteButton;
+      newButton.type = 'button';
+      newButton.className = boton.className;
+      newButton.innerHTML = boton.innerHTML;
+      newButton.dataset.id = boton.getAttribute('data-id') || '';
+      newButton.dataset.nombre = boton.getAttribute('data-nombre') || '';
+      
+      // Agregar el evento al nuevo botón
+      newButton.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        const nombre = this.getAttribute('data-nombre');
+        const fila = this.closest('tr');
+        
+        if (!id || !nombre) {
+          console.error('Faltan atributos de datos en el botón');
+          return;
+        }
+        
+        // Usar SweetAlert2 para la confirmación
+        Swal.fire({
+          title: '¿Está seguro?',
+          text: `¿Desea eliminar el plano "${nombre}"?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed && id) {
+            eliminarPlano(id, fila);
+          }
+        });
+      });
+      
+      // Reemplazar el botón original con el nuevo
+      const parentNode = boton.parentNode;
+      if (parentNode) {
+        parentNode.replaceChild(newButton, boton);
+      } else {
+        console.error('No se pudo encontrar el nodo padre del botón');
+      }
+    });
+  }
+
+  // Configurar filtros
+  function setupFilters(): void {
+    console.log("Configurando filtros para planos...");
+    const buscarNombre = document.getElementById('buscarNombre') as FilterInput | null;
+    const buscarCliente = document.getElementById('buscarCliente') as FilterInput | null;
+    const filtrarTipo = document.getElementById('filtrarTipo') as FilterSelect | null;
+    
+    if (buscarNombre) buscarNombre.addEventListener('input', filtrarPlanos);
+    if (buscarCliente) buscarCliente.addEventListener('input', filtrarPlanos);
+    if (filtrarTipo) filtrarTipo.addEventListener('change', filtrarPlanos);
+  }
+
+  // Función para eliminar un plano
+  function eliminarPlano(id: string, fila: HTMLTableRowElement | null): void {
+    // Mostrar indicador de carga
+    Swal.fire({
+      title: 'Eliminando...',
+      text: 'Por favor espere',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    
+    fetch('/api/eliminar-plano', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: id }),
+    })
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data: { success: boolean, error?: string }) {
+      if (data.success) {
+        // Eliminar la fila de la tabla sin recargar la página
+        if (fila) {
+          fila.remove();
+        }
+        
+        // Verificar si la tabla está vacía
+        const tbody = document.getElementById('planosTableBody');
+        if (tbody && tbody.children.length === 0) {
+          // Si no hay más planos, mostrar mensaje
+          const container = tbody.closest('.relative');
+          if (container) {
+            container.innerHTML = `
+              <div class="text-center py-8">
+                <p class="text-muted-foreground">No hay planos disponibles. Sube tu primer plano.</p>
+              </div>
+            `;
+          }
+        }
+        
+        // Mostrar mensaje de éxito
+        Swal.fire({
+          title: '¡Eliminado!',
+          text: 'El plano ha sido eliminado correctamente.',
+          icon: 'success',
+          confirmButtonColor: '#3085d6'
+        });
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: data.error || 'No se pudo eliminar el plano',
+          icon: 'error',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    })
+    .catch(function(error) {
+      console.error('Error al eliminar el plano:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Error al eliminar el plano. Por favor, inténtelo de nuevo.',
+        icon: 'error',
+        confirmButtonColor: '#3085d6'
+      });
+    });
+  }
+
+  // Función para filtrar planos
+  function filtrarPlanos(): void {
+    const buscarNombreInput = document.getElementById('buscarNombre') as FilterInput | null;
+    const buscarClienteInput = document.getElementById('buscarCliente') as FilterInput | null;
+    const filtrarTipoSelect = document.getElementById('filtrarTipo') as FilterSelect | null;
+    
+    if (!buscarNombreInput || !buscarClienteInput || !filtrarTipoSelect) return;
+    
+    const buscarNombre = buscarNombreInput.value.toLowerCase();
+    const buscarCliente = buscarClienteInput.value.toLowerCase();
+    const filtrarTipo = filtrarTipoSelect.value.toLowerCase();
+    
+    const filas = document.querySelectorAll<HTMLTableRowElement>('.plano-row');
+    let hayResultados = false;
+    
+    filas.forEach(function(fila) {
+      const nombre = fila.getAttribute('data-nombre') || '';
+      const cliente = fila.getAttribute('data-cliente') || '';
+      const tipo = fila.getAttribute('data-tipo') || '';
+      
+      // Aplicar filtros
+      const coincideNombre = !buscarNombre || nombre.includes(buscarNombre);
+      const coincideCliente = !buscarCliente || cliente.includes(buscarCliente);
+      const coincideTipo = !filtrarTipo || tipo === filtrarTipo;
+      
+      // Mostrar u ocultar la fila según los filtros
+      if (coincideNombre && coincideCliente && coincideTipo) {
+        fila.style.display = '';
+        hayResultados = true;
+      } else {
+        fila.style.display = 'none';
+      }
+    });
+    
+    // Mostrar mensaje de "no hay resultados" si es necesario
+    const noResultados = document.getElementById('noResultados');
+    if (noResultados) {
+      if (hayResultados) {
+        noResultados.classList.add('hidden');
+      } else {
+        noResultados.classList.remove('hidden');
+      }
+    }
+  }
+
+  // Función para inicializar todo
+  function initializePage(): void {
+    console.log("Inicializando página de planos...");
+    cargarEstilosSweetAlert();
+    setupDeleteButtons();
+    setupFilters();
+  }
+
+  // Ejecutar en DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', initializePage);
+
+  // Ejecutar también en el evento astro:page-load para View Transitions
+  document.addEventListener('astro:page-load', initializePage);
+
+  // Ejecutar inmediatamente para asegurar que funcione en la carga inicial
+  // Pero con un pequeño retraso para asegurar que el DOM esté listo
+  setTimeout(initializePage, 0);
+</script>
+

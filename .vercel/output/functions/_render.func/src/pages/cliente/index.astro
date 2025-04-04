@@ -1,0 +1,171 @@
+---
+import ClienteLayout from '../../layouts/ClienteLayout.astro';
+import { getPlanosByUserId } from '../../lib/db.js';
+import { isAuthenticated } from '../../lib/auth.js';
+
+// Definir la interfaz para los planos
+interface Plano {
+  id: number;
+  nombre: string;
+  tipo: string;
+  fecha_subida: string;
+  archivo_url: string;
+  usuario_id: number;
+  descripcion?: string;
+}
+
+// Obtener el usuario autenticado
+const usuario = isAuthenticated(Astro.request);
+
+// Redirigir si no está autenticado o no es cliente
+if (!usuario || usuario.tipo.toLowerCase() !== 'cliente') {
+  return Astro.redirect('/login');
+}
+
+// Obtener los planos del cliente usando su ID real
+let planos: Plano[] = [];
+let error = null;
+
+try {
+  console.log(`Obteniendo planos para el usuario ${usuario.id} (${usuario.nombre})`);
+  const result = await getPlanosByUserId(usuario.id);
+  planos = result;
+  console.log(`Se encontraron ${planos.length} planos para el usuario ${usuario.id}`);
+} catch (err) {
+  console.error("Error al obtener planos:", err);
+  error = "Error al cargar los planos. Por favor, inténtelo de nuevo más tarde.";
+}
+---
+
+<ClienteLayout title="Mis Planos" activeLink="planos">
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-2">
+    <h1 class="text-2xl font-bold tracking-tight">Mis Planos</h1>
+    <p class="text-muted-foreground">
+      Bienvenido, {usuario.nombre}. Acceda a todos los planos compartidos por el ingeniero.
+    </p>
+  </div>
+  
+  {error && (
+    <div class="bg-destructive/15 text-destructive p-4 rounded-md">
+      <p>{error}</p>
+    </div>
+  )}
+  
+  <div class="rounded-lg border shadow-sm">
+    <div class="p-4">
+      {planos.length === 0 ? (
+        <div class="text-center py-8">
+          <p class="text-muted-foreground">Aún no tiene planos cargados. Contacte con el ingeniero para más información.</p>
+        </div>
+      ) : (
+        <div class="relative w-full overflow-auto">
+          <table class="w-full caption-bottom text-sm">
+            <thead class="[&_tr]:border-b">
+              <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Nombre</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Tipo</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Fecha</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Descripción</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="[&_tr:last-child]:border-0">
+              {planos.map((plano) => (
+                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                  <td class="p-4 align-middle">{plano.nombre}</td>
+                  <td class="p-4 align-middle">{plano.tipo}</td>
+                  <td class="p-4 align-middle">{new Date(plano.fecha_subida).toLocaleDateString()}</td>
+                  <td class="p-4 align-middle">
+                    <div class="max-w-xs overflow-hidden text-ellipsis whitespace-nowrap">
+                      {plano.descripcion ? 
+                        (plano.descripcion.length > 50 ? 
+                          plano.descripcion.substring(0, 50) + '...' : 
+                          plano.descripcion) : 
+                        'Sin descripción'}
+                    </div>
+                  </td>
+                  <td class="p-4 align-middle">
+                    <div class="flex gap-2">
+                      <a 
+                        href={`/cliente/plano/${plano.id}`}
+                        class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        Ver detalles
+                      </a>
+                      <a 
+                        href={plano.archivo_url}
+                        target="_blank"
+                        class="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 download-btn"
+                        data-plano-id={plano.id}
+                        data-usuario-id={usuario.id}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Descargar
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+</ClienteLayout>
+
+<script define:vars={{ usuarioId: usuario.id }}>
+  // Función para registrar la descarga en el historial
+  async function registrarDescarga(planoId, userId) {
+    try {
+      console.log(`Registrando descarga: plano=${planoId}, usuario=${userId}`);
+      
+      const response = await fetch('/api/registrar-descarga', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          plano_id: planoId,
+          usuario_id: userId
+        }),
+      });
+      
+      const data = await response.json();
+      console.log('Respuesta del servidor:', data);
+      
+      if (!data.success) {
+        console.error('Error al registrar descarga:', data.error);
+      }
+    } catch (error) {
+      console.error('Error al registrar descarga:', error);
+    }
+  }
+  
+  // Agregar event listeners a todos los botones de descarga
+  document.addEventListener('DOMContentLoaded', () => {
+    const downloadButtons = document.querySelectorAll('.download-btn');
+    
+    downloadButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        // No prevenir el comportamiento predeterminado para permitir la descarga
+        const planoId = this.getAttribute('data-plano-id');
+        const userId = this.getAttribute('data-usuario-id') || usuarioId;
+        
+        // Registrar la descarga
+        registrarDescarga(planoId, userId);
+      });
+    });
+  });
+</script>
+

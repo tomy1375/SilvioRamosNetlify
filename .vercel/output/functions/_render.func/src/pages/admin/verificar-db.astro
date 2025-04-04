@@ -1,0 +1,115 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Verificar Base de Datos" activeLink="configuracion">
+  <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-2xl font-bold tracking-tight">Verificar Base de Datos</h1>
+      <p class="text-muted-foreground">
+        Herramienta para verificar la estructura y datos de la base de datos.
+      </p>
+    </div>
+    
+    <div class="rounded-lg border shadow-sm">
+      <div class="p-6">
+        <h2 class="text-xl font-semibold mb-4">Información de Tablas</h2>
+        
+        <div id="db-info" class="space-y-4">
+          <p>Cargando información de la base de datos...</p>
+        </div>
+        
+        <div class="mt-6">
+          <button 
+            id="refresh-btn"
+            class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            Actualizar Información
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  // Función para verificar la base de datos
+  async function checkDatabase() {
+    try {
+      const dbInfoDiv = document.getElementById('db-info');
+      if (dbInfoDiv) {
+        dbInfoDiv.innerHTML = '<p>Cargando información de la base de datos...</p>';
+      }
+      
+      const response = await fetch('/api/check-db-tables');
+      const data = await response.json();
+      
+      if (dbInfoDiv) {
+        if (data.success) {
+          let html = '<div class="space-y-6">';
+          
+          // Información de la tabla de usuarios
+          html += '<div>';
+          html += '<h3 class="text-lg font-medium mb-2">Tabla de Usuarios</h3>';
+          
+          // Columnas de la tabla
+          html += '<div class="mb-4">';
+          html += '<h4 class="font-medium mb-1">Estructura:</h4>';
+          html += '<div class="bg-gray-100 p-4 rounded overflow-auto">';
+          html += '<table class="min-w-full">';
+          html += '<thead><tr><th class="text-left pr-4">Columna</th><th class="text-left">Tipo</th></tr></thead>';
+          html += '<tbody>';
+          
+          data.usuariosColumns.forEach(column => {
+            html += `<tr><td class="pr-4">${column.column_name}</td><td>${column.data_type}</td></tr>`;
+          });
+          
+          html += '</tbody></table>';
+          html += '</div>';
+          html += '</div>';
+          
+          // Cantidad de registros
+          html += `<p class="mb-2"><strong>Cantidad de registros:</strong> ${data.usuariosCount}</p>`;
+          
+          // Mostrar todos los usuarios para depuración
+          html += '<div>';
+          html += '<h4 class="font-medium mb-1">Registros:</h4>';
+          html += '<div class="bg-gray-100 p-4 rounded overflow-auto max-h-96">';
+          html += '<pre class="text-xs">' + JSON.stringify(data.allUsers, null, 2) + '</pre>';
+          html += '</div>';
+          html += '</div>';
+          
+          html += '</div>'; // Cierre de la sección de usuarios
+          
+          html += '</div>'; // Cierre del contenedor principal
+          
+          dbInfoDiv.innerHTML = html;
+        } else {
+          dbInfoDiv.innerHTML = `<p class="text-red-600">Error: ${data.error || 'Ocurrió un error desconocido'}</p>`;
+          if (data.details) {
+            dbInfoDiv.innerHTML += `<p class="text-sm text-muted-foreground">${data.details}</p>`;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error al verificar la base de datos:', error);
+      const dbInfoDiv = document.getElementById('db-info');
+      if (dbInfoDiv) {
+        dbInfoDiv.innerHTML = '<p class="text-red-600">Error al verificar la base de datos</p>';
+      }
+    }
+  }
+  
+  // Ejecutar cuando el DOM esté cargado
+  document.addEventListener('DOMContentLoaded', () => {
+    // Verificar la base de datos
+    checkDatabase();
+    
+    // Agregar evento al botón de actualizar
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', checkDatabase);
+    }
+  });
+</script>
+

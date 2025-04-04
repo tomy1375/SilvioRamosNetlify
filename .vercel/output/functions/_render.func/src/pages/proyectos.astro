@@ -1,0 +1,256 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProjectModal from '../components/ProjectModal.jsx';
+
+// Define project data for consistency and reuse
+const projects = [
+{
+  id: 1,
+  title: "Monumento del Bicentenario - Jujuy",
+  description: "Proyecto de ingeniería que integra análisis estructural y diseño de cimentación para una estructura de 30 m. Ubicada junto a la nueva terminal de ómnibus. Incorpora un sistema de iluminación inteligente para realzar su impacto urbano y cultural.",
+  image: "monumento.webp"
+},
+
+  {
+    id: 2,
+    title: "Shopping Annuar",
+    description: "Proyecto integral de ingeniería y arquitectura para el diseño y construcción de un centro comercial. Incluyó análisis estructural, diseño de cimentaciones y optimización de flujos peatonales y vehiculares, impulsando la dinamización de la zona.",
+    image: "shop.webp"
+  },
+  {
+    id: 3,
+    title: "Sistema de Drenaje",
+    description: "Diseño e implementación de sistema de drenaje urbano. Este proyecto resolvió problemas históricos de inundaciones en un área residencial, implementando soluciones innovadoras de captación y conducción de aguas pluviales que respetan el medio ambiente.",
+    image: "/1.jpg"
+  },
+  {
+    id: 4,
+    title: "Complejo Residencial",
+    description: "Diseño estructural para complejo de apartamentos. Este desarrollo residencial incluye 120 unidades distribuidas en 5 edificios, con áreas comunes, estacionamientos subterráneos y espacios verdes. El diseño estructural garantiza seguridad y durabilidad.",
+    image: "/2.jpg"
+  },
+  {
+    id: 5,
+    title: "Carretera Regional",
+    description: "Diseño y supervisión de construcción de carretera. Este proyecto de 45 km conecta varias comunidades rurales, mejorando el acceso a servicios esenciales y fomentando el desarrollo económico de la región. Incluye puentes, sistemas de drenaje y señalización completa.",
+    image: "/3.jpg"
+  },
+  {
+    id: 6,
+    title: "Planta de Tratamiento",
+    description: "Diseño de planta de tratamiento de aguas residuales. Esta instalación procesa hasta 500,000 litros diarios, utilizando tecnologías avanzadas de tratamiento biológico y químico para devolver agua limpia al medio ambiente, cumpliendo con todas las normativas ambientales.",
+    image: "/4.jpg"
+  }
+];
+---
+
+<Layout title="Nuestros Proyectos">
+  <div id="modal-container"></div>
+  
+  <section class="w-full py-12 md:py-24 lg:py-32 mt-">
+    <div class="container px-4 md:px-6">
+      <div class="flex flex-col items-center justify-center space-y-4 text-center">
+        <div class="space-y-2">
+          <h1 class="text-3xl font-bold tracking-tighter sm:text-5xl mt-16 md:mt-0">Nuestros Proyectos</h1>
+          <p class="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            Explore nuestra cartera de proyectos completados y en curso.
+          </p>
+        </div>
+      </div>
+      <div class="grid gap-6 py-12 md:grid-cols-2 lg:grid-cols-3">
+        {projects.map((project) => (
+          <div 
+            class="group relative overflow-hidden rounded-lg border cursor-pointer project-card" 
+            data-project-id={project.id}
+          >
+            <div class="w-full aspect-[4/3] overflow-hidden">
+              <img
+                src={project.image || "/placeholder.svg"}
+                width="600"
+                height="450"
+                alt={project.title}
+                class="w-full h-full object-cover transition-transform group-hover:scale-105"
+              />
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <div class="absolute bottom-0 p-4 text-white opacity-0 transition-opacity group-hover:opacity-100">
+              <h3 class="font-bold">{project.title}</h3>
+              <p class="text-sm">{project.description.split('.')[0]}.</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+  
+  <section class="w-full py-12 md:py-24 lg:py-32 bg-muted">
+    <div class="container px-4 md:px-6">
+      <div class="flex flex-col items-center justify-center space-y-4 text-center">
+        <div class="space-y-2">
+          <h2 class="text-3xl font-bold tracking-tighter sm:text-4xl">Categorías de Proyectos</h2>
+          <p class="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            Explore nuestros proyectos por categoría.
+          </p>
+        </div>
+      </div>
+      <div class="grid gap-6 py-12 md:grid-cols-2 lg:grid-cols-4">
+        <a href="/proyectos/categoria/estructuras" class="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm hover:bg-accent">
+          <div class="rounded-full bg-primary/10 p-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-primary">
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <path d="M3 9h18" />
+              <path d="M9 21V9" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold">Estructuras</h3>
+          <p class="text-center text-sm text-muted-foreground">
+            Edificios, puentes y otras estructuras.
+          </p>
+        </a>
+        <a href="/proyectos/categoria/vias" class="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm hover:bg-accent">
+          <div class="rounded-full bg-primary/10 p-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-primary">
+              <path d="M4 19h16" />
+              <path d="M4 15h16" />
+              <path d="M4 11h16" />
+              <path d="M4 7h16" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold">Vías y Carreteras</h3>
+          <p class="text-center text-sm text-muted-foreground">
+            Carreteras, caminos y vías urbanas.
+          </p>
+        </a>
+        <a href="/proyectos/categoria/hidraulica" class="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm hover:bg-accent">
+          <div class="rounded-full bg-primary/10 p-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-primary">
+              <path d="M20.5 10c-.5-4.5-4-8-8.5-8s-8 3.5-8.5 8c-.5 4.5 2.5 8 6 8.5h5c3.5-.5 6.5-4 6-8.5Z" />
+              <path d="M12 12v6" />
+              <path d="M12 12a4 4 0 0 1-4-4" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold">Hidráulica</h3>
+          <p class="text-center text-sm text-muted-foreground">
+            Sistemas de agua, drenaje y tratamiento.
+          </p>
+        </a>
+        <a href="/proyectos/categoria/urbanismo" class="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm hover:bg-accent">
+          <div class="rounded-full bg-primary/10 p-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-primary">
+              <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
+              <path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4" />
+              <path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold">Urbanismo</h3>
+          <p class="text-center text-sm text-muted-foreground">
+            Planificación urbana y desarrollo.
+          </p>
+        </a>
+      </div>
+    </div>
+  </section>
+  
+  <section class="w-full py-12 md:py-24 lg:py-32">
+    <div class="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
+      <div class="space-y-3">
+        <h2 class="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+          ¿Tiene un proyecto en mente?
+        </h2>
+        <p class="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed">
+          Contáctenos para discutir cómo podemos ayudarle a hacer realidad su proyecto.
+        </p>
+      </div>
+      <div class="mx-auto flex flex-col gap-2 min-[400px]:flex-row">
+        <a href="/contacto" class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+          Contactar Ahora
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Component (client-side) -->
+  <ProjectModal client:load projects={projects} />
+
+  <script>
+    // Función para manejar el desplazamiento de la página cuando se abre el modal
+    function lockScroll() {
+      // Obtener el ancho actual del viewport
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Aplicar estilos para prevenir el desplazamiento
+      document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
+      document.documentElement.classList.add('modal-open');
+    }
+    
+    function unlockScroll() {
+      document.documentElement.classList.remove('modal-open');
+    }
+    
+    // Configurar las tarjetas de proyecto
+    function setupProjectCards() {
+      const projectCards = document.querySelectorAll('.project-card');
+      
+      projectCards.forEach(card => {
+        card.addEventListener('click', () => {
+          const projectId = card.getAttribute('data-project-id');
+          if (projectId) {
+            // Bloquear el scroll antes de abrir el modal
+            lockScroll();
+            
+            document.dispatchEvent(new CustomEvent('openProjectModal', { 
+              detail: { projectId: parseInt(projectId) } 
+            }));
+          }
+        });
+      });
+    }
+    
+    // Escuchar el evento de cierre del modal para desbloquear el scroll
+    document.addEventListener('closeProjectModal', unlockScroll);
+    
+    // Configurar las tarjetas al cargar la página
+    document.addEventListener('astro:page-load', () => {
+      setupProjectCards();
+    });
+
+    // También ejecutar en la carga inicial del DOM para la primera visita
+    document.addEventListener('DOMContentLoaded', () => {
+      setupProjectCards();
+    });
+  </script>
+</Layout>
+
+<style>
+  /* Añadimos un margen superior para compensar el header fijo */
+  section:first-child {
+    padding-top: 8rem;
+  }
+
+  @media (max-width: 768px) {
+    section:first-child {
+      padding-top: 6rem;
+    }
+  }
+  
+  /* Estilos para manejar el modal y prevenir el desplazamiento */
+  :root {
+    --scrollbar-width: 0px;
+  }
+  
+  .modal-open {
+    overflow: hidden;
+    padding-right: var(--scrollbar-width);
+  }
+  
+  /* Asegurarse de que el contenedor del modal esté correctamente posicionado */
+  #modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 50;
+    pointer-events: none;
+  }
+</style>

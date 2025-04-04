@@ -1,0 +1,175 @@
+---
+import ClienteLayout from '../../layouts/ClienteLayout.astro';
+import { getHistorialByUserId } from '../../lib/db.js';
+import { isAuthenticated } from '../../lib/auth.js';
+
+// Definir la interfaz para el historial
+interface HistorialItem {
+  id: number;
+  fecha: string;
+  hora: string;
+  nombre: string;
+  tipo: string;
+  archivo_url: string;
+  plano_id: number;
+}
+
+// Obtener el usuario autenticado
+const usuario = isAuthenticated(Astro.request);
+
+// Redirigir si no está autenticado o no es cliente
+if (!usuario || usuario.tipo.toLowerCase() !== 'cliente') {
+  return Astro.redirect('/login');
+}
+
+// Obtener el historial del cliente usando su ID real
+let historial: HistorialItem[] = [];
+let error = null;
+
+try {
+  console.log(`Obteniendo historial para el usuario ${usuario.id} (${usuario.nombre})`);
+  const result = await getHistorialByUserId(usuario.id);
+  historial = result;
+  console.log(`Se encontraron ${historial.length} registros de historial para el usuario ${usuario.id}`);
+  console.log("Historial:", historial);
+} catch (err) {
+  console.error("Error al obtener historial:", err);
+  error = "Error al cargar el historial. Por favor, inténtelo de nuevo más tarde.";
+}
+---
+
+<ClienteLayout title="Historial de Descargas" activeLink="historial">
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-2">
+    <h1 class="text-2xl font-bold tracking-tight">Historial de Descargas</h1>
+    <p class="text-muted-foreground">
+      Bienvenido, {usuario.nombre}. Vea un registro de todos los planos que ha descargado.
+    </p>
+  </div>
+  
+  {error && (
+    <div class="bg-destructive/15 text-destructive p-4 rounded-md">
+      <p>{error}</p>
+    </div>
+  )}
+  
+  <div class="rounded-lg border shadow-sm">
+    <div class="p-4">
+      {historial.length === 0 ? (
+        <div class="text-center py-8">
+          <p class="text-muted-foreground">Aún no ha descargado ningún plano. Visite la sección "Mis Planos" para ver los planos disponibles.</p>
+        </div>
+      ) : (
+        <div class="relative w-full overflow-auto">
+          <table class="w-full caption-bottom text-sm">
+            <thead class="[&_tr]:border-b">
+              <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Fecha</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Hora</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Nombre del Plano</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Tipo</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Acción</th>
+              </tr>
+            </thead>
+            <tbody class="[&_tr:last-child]:border-0">
+              {historial.map((item) => (
+                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                  <td class="p-4 align-middle">{new Date(item.fecha).toLocaleDateString()}</td>
+                  <td class="p-4 align-middle">{item.hora}</td>
+                  <td class="p-4 align-middle">{item.nombre}</td>
+                  <td class="p-4 align-middle">{item.tipo}</td>
+                  <td class="p-4 align-middle">
+                    <a 
+                      href={item.archivo_url}
+                      target="_blank"
+                      class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 download-btn"
+                      data-plano-id={item.plano_id}
+                      data-usuario-id={usuario.id}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      Descargar de nuevo
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+  
+  <div class="flex justify-center">
+    <button 
+      id="refresh-btn"
+      class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+        <path d="M21 2v6h-6"></path>
+        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+        <path d="M3 22v-6h6"></path>
+        <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+      </svg>
+      Actualizar historial
+    </button>
+  </div>
+</div>
+</ClienteLayout>
+
+<script define:vars={{ usuarioId: usuario.id }}>
+  // Función para registrar la descarga en el historial
+  async function registrarDescarga(planoId, userId) {
+    try {
+      console.log(`Registrando descarga: plano=${planoId}, usuario=${userId}`);
+      
+      const response = await fetch('/api/registrar-descarga', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          plano_id: planoId,
+          usuario_id: userId
+        }),
+      });
+      
+      const data = await response.json();
+      console.log('Respuesta del servidor:', data);
+      
+      if (!data.success) {
+        console.error('Error al registrar descarga:', data.error);
+      }
+    } catch (error) {
+      console.error('Error al registrar descarga:', error);
+    }
+  }
+  
+  // Agregar event listeners a todos los botones de descarga
+  document.addEventListener('DOMContentLoaded', () => {
+    const downloadButtons = document.querySelectorAll('.download-btn');
+    
+    downloadButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        // No prevenir el comportamiento predeterminado para permitir la descarga
+        const planoId = this.getAttribute('data-plano-id');
+        const userId = this.getAttribute('data-usuario-id') || usuarioId;
+        
+        // Registrar la descarga
+        registrarDescarga(planoId, userId);
+      });
+    });
+    
+    // Agregar event listener al botón de actualizar
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', function() {
+        window.location.reload();
+      });
+    }
+  });
+</script>
+

@@ -1,0 +1,11 @@
+---
+// src/pages/contacto.astro
+import Layout from '../layouts/Layout.astro';
+import ContactPage from '../components/ContactPage';
+---
+
+<Layout title="Contacto - Ingeniería Civil">
+  <div class="container px-4 md:px-6 py-12 md:py-24">
+    <ContactPage client:only="react" />
+  </div>
+</Layout>

@@ -1,0 +1,233 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getPlanoById, getUsers } from '../../../lib/db.js';
+
+// Obtener el ID del plano de los parámetros de la URL
+const { id } = Astro.params;
+
+// Obtener información del plano
+let plano = null;
+let error = null;
+let usuarios = [];
+
+try {
+  console.log("Intentando obtener plano con ID:", id);
+  
+  if (id) {
+    plano = await getPlanoById(parseInt(id));
+    console.log("Resultado de getPlanoById:", plano);
+    
+    if (!plano) {
+      error = "Plano no encontrado";
+    }
+  } else {
+    error = "ID de plano no proporcionado";
+  }
+
+  // Obtener la lista de usuarios (clientes)
+  usuarios = await getUsers();
+  console.log(`Se encontraron ${usuarios.length} usuarios`);
+  
+  // Filtrar solo los usuarios de tipo "cliente"
+  usuarios = usuarios.filter((usuario: any) => 
+    usuario.tipo && usuario.tipo.toLowerCase() === 'cliente'
+  );
+  console.log(`Después de filtrar, quedan ${usuarios.length} clientes`);
+  
+} catch (e) {
+  console.error("Error al obtener datos:", e);
+  error = "Error al cargar los datos";
+}
+---
+
+<AdminLayout title="Editar Plano" activeLink="planos">
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col gap-2">
+    <h1 class="text-2xl font-bold tracking-tight">Editar Plano</h1>
+    <p class="text-muted-foreground">
+      Modifique los detalles del plano seleccionado.
+    </p>
+  </div>
+
+  {error && (
+    <div class="bg-destructive/15 text-destructive p-4 rounded-md">
+      <p>{error}</p>
+      <a href="/admin/planos" class="text-primary hover:underline mt-2 inline-block">Volver a la lista de planos</a>
+    </div>
+  )}
+
+  {plano && (
+    <div class="rounded-lg border shadow-sm">
+      <div class="p-6">
+        <form id="editarPlanoForm" class="space-y-6">
+          <input type="hidden" name="id" value={plano.id} />
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label for="nombre" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nombre del Plano</label>
+              <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                value={plano.nombre}
+                required
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+            
+            <div class="space-y-2">
+              <label for="tipo" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Tipo de Plano</label>
+              <select
+                id="tipo"
+                name="tipo"
+                required
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="Arquitectónico" selected={plano.tipo === 'Arquitectónico'}>Arquitectónico</option>
+                <option value="Estructural" selected={plano.tipo === 'Estructural'}>Estructural</option>
+                <option value="Eléctrico" selected={plano.tipo === 'Eléctrico'}>Eléctrico</option>
+                <option value="Hidráulico" selected={plano.tipo === 'Hidráulico'}>Hidráulico</option>
+                <option value="Sanitario" selected={plano.tipo === 'Sanitario'}>Sanitario</option>
+                <option value="Otro" selected={plano.tipo === 'Otro'}>Otro</option>
+              </select>
+            </div>
+            
+            <div class="space-y-2">
+              <label for="cliente" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Cliente</label>
+              <select
+                id="cliente"
+                name="cliente"
+                required
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {usuarios.map((usuario: any) => (
+                  <option value={usuario.id} selected={usuario.id === plano.usuario_id}>{usuario.nombre}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Archivo Actual</label>
+              <div class="flex items-center gap-2">
+                <a 
+                  href={plano.archivo_url} 
+                  target="_blank" 
+                  class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                >
+                  Ver archivo actual
+                </a>
+                <span class="text-sm text-muted-foreground">(No se puede cambiar el archivo)</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="space-y-2">
+            <label for="descripcion" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Descripción</label>
+            <textarea
+              id="descripcion"
+              name="descripcion"
+              rows="4"
+              class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >{plano.descripcion}</textarea>
+          </div>
+          
+          <div class="flex justify-end gap-4">
+            <a 
+              href="/admin/planos" 
+              class="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            >
+              Cancelar
+            </a>
+            <button 
+              type="button" 
+              id="guardarCambios"
+              class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            >
+              Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )}
+</div>
+</AdminLayout>
+
+<script is:inline>
+  // Función para guardar los cambios del plano
+  function guardarCambiosPlano() {
+    console.log('Guardando cambios del plano...');
+    
+    // Obtener el formulario
+    const form = document.getElementById('editarPlanoForm');
+    
+    if (form) {
+      // Obtener los datos del formulario
+      const formData = new FormData(form);
+      
+      const id = formData.get('id');
+      const nombre = formData.get('nombre');
+      const tipo = formData.get('tipo');
+      const cliente = formData.get('cliente');
+      const descripcion = formData.get('descripcion');
+      
+      // Mostrar los datos que se van a enviar (para depuración)
+      console.log('Enviando datos:', { id, nombre, tipo, usuario_id: cliente, descripcion });
+      
+      // Enviar los datos al servidor
+      fetch('/api/actualizar-plano', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id,
+          nombre,
+          tipo,
+          usuario_id: cliente,
+          descripcion,
+        }),
+      })
+      .then(response => {
+        console.log('Respuesta recibida:', response);
+        return response.json();
+      })
+      .then(data => {
+        console.log('Datos recibidos:', data);
+        if (data.success) {
+          alert('Plano actualizado correctamente');
+          window.location.href = '/admin/planos';
+        } else {
+          alert(`Error: ${data.error || 'No se pudo actualizar el plano'}`);
+        }
+      })
+      .catch(error => {
+        console.error('Error al actualizar el plano:', error);
+        alert('Error al actualizar el plano. Por favor, inténtelo de nuevo.');
+      });
+    } else {
+      console.error('Formulario no encontrado');
+    }
+  }
+  
+  // Asignar el evento al botón inmediatamente
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM cargado, inicializando eventos...');
+    
+    const guardarBtn = document.getElementById('guardarCambios');
+    if (guardarBtn) {
+      console.log('Botón de guardar encontrado, agregando evento click');
+      guardarBtn.addEventListener('click', guardarCambiosPlano);
+    } else {
+      console.error('Botón de guardar no encontrado');
+    }
+  });
+  
+  // También asignar el evento inmediatamente por si el DOM ya está cargado
+  const guardarBtn = document.getElementById('guardarCambios');
+  if (guardarBtn) {
+    console.log('Botón de guardar encontrado (fuera de DOMContentLoaded), agregando evento click');
+    guardarBtn.addEventListener('click', guardarCambiosPlano);
+  }
+</script>
+

@@ -1,0 +1,33 @@
+/* empty css                                            */
+import { c as createComponent, r as renderComponent, a as renderScript, b as renderTemplate, m as maybeRenderHead } from '../../chunks/astro/server_dC-6T-Kg.mjs';
+import 'kleur/colors';
+import { $ as $$AdminLayout } from '../../chunks/AdminLayout_78FMoF68.mjs';
+export { renderers } from '../../renderers.mjs';
+
+const $$Configuracion = createComponent(async ($$result, $$props, $$slots) => {
+  return renderTemplate`${renderComponent($$result, "AdminLayout", $$AdminLayout, { "title": "Configuraci\xF3n", "activeLink": "configuracion" }, { "default": async ($$result2) => renderTemplate` ${maybeRenderHead()}<div class="flex flex-col gap-6"> <div class="flex flex-col gap-2"> <h1 class="text-2xl font-bold tracking-tight">Configuración</h1> <p class="text-muted-foreground">
+Configure los ajustes de la aplicación y su cuenta.
+</p> </div> <!-- Configuración de la cuenta --> <div class="rounded-lg border shadow-sm"> <div class="p-6"> <h2 class="text-xl font-semibold mb-4">Configuración de la Cuenta</h2> <form id="cambiarPasswordForm" class="space-y-4"> <div class="space-y-2"> <label for="currentPassword" class="text-sm font-medium leading-none">Contraseña Actual</label> <input type="password" id="currentPassword" name="currentPassword" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required> </div> <div class="space-y-2"> <label for="newPassword" class="text-sm font-medium leading-none">Nueva Contraseña</label> <input type="password" id="newPassword" name="newPassword" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required> </div> <div class="space-y-2"> <label for="confirmPassword" class="text-sm font-medium leading-none">Confirmar Nueva Contraseña</label> <input type="password" id="confirmPassword" name="confirmPassword" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required> </div> <div> <button type="submit" class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+Cambiar Contraseña
+</button> </div> <div id="passwordResult" class="mt-2"></div> </form> </div> </div> <!-- Configuración de notificaciones --> <div class="rounded-lg border shadow-sm"> <div class="p-6"> <h2 class="text-xl font-semibold mb-4">Preferencias de Notificaciones</h2> <div class="space-y-4"> <div class="flex items-center space-x-2"> <input type="checkbox" id="emailNotifications" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" checked> <label for="emailNotifications" class="text-sm font-medium leading-none">Recibir notificaciones por correo electrónico</label> </div> <div class="flex items-center space-x-2"> <input type="checkbox" id="newPlanosNotifications" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" checked> <label for="newPlanosNotifications" class="text-sm font-medium leading-none">Notificar cuando se suban nuevos planos</label> </div> <div class="flex items-center space-x-2"> <input type="checkbox" id="downloadNotifications" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" checked> <label for="downloadNotifications" class="text-sm font-medium leading-none">Notificar cuando un cliente descargue un plano</label> </div> <div> <button id="saveNotificationsBtn" class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+Guardar Preferencias
+</button> </div> <div id="notificationsResult" class="mt-2"></div> </div> </div> </div> <!-- Configuración del sistema --> <div class="rounded-lg border shadow-sm"> <div class="p-6"> <h2 class="text-xl font-semibold mb-4">Configuración del Sistema</h2> <div id="env-status" class="space-y-4 mb-6"> <p>Cargando información de variables de entorno...</p> </div> <div class="space-y-4"> <h3 class="text-lg font-medium">Base de Datos</h3> <div class="flex space-x-4"> <button id="setup-db-btn" class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+Configurar Base de Datos
+</button> <button id="backup-db-btn" class="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+Crear Respaldo
+</button> </div> <div id="setup-result" class="mt-2"></div> </div> </div> </div> </div> ` })} ${renderScript($$result, "E:/TrabajosProgramador/Silvio Ramos/ingecivil-website/src/pages/admin/configuracion.astro?astro&type=script&index=0&lang.ts")}`;
+}, "E:/TrabajosProgramador/Silvio Ramos/ingecivil-website/src/pages/admin/configuracion.astro", void 0);
+
+const $$file = "E:/TrabajosProgramador/Silvio Ramos/ingecivil-website/src/pages/admin/configuracion.astro";
+const $$url = "/admin/configuracion";
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+   __proto__: null,
+   default: $$Configuracion,
+   file: $$file,
+   url: $$url
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };

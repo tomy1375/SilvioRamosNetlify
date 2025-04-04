@@ -1,0 +1,230 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getUsers } from '../../lib/db.js';
+
+// Definir la interfaz para los usuarios
+interface Usuario {
+  id: number;
+  nombre: string;
+  email: string;
+  tipo: string;
+  empresa?: string;
+  telefono?: string;
+}
+
+// Añadir más logs detallados para depurar el problema
+let usuarios: Usuario[] = [];
+try {
+  console.log("Obteniendo usuarios desde la base de datos...");
+  const result = await getUsers();
+  console.log(`Se encontraron ${result.length} usuarios en la base de datos`);
+  usuarios = result;
+} catch (error) {
+  console.error("Error al obtener usuarios:", error);
+}
+---
+
+<AdminLayout title="Gestión de Usuarios" activeLink="usuarios">
+<div class="flex flex-col gap-6">
+  <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-2xl font-bold tracking-tight">Gestión de Usuarios</h1>
+      <p class="text-muted-foreground">
+        Administre los usuarios del sistema.
+      </p>
+    </div>
+    <a href="/admin/nuevo-usuario" class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <line x1="19" x2="19" y1="8" y2="14"></line>
+        <line x1="22" x2="16" y1="11" y2="11"></line>
+      </svg>
+      Nuevo Usuario
+    </a>
+  </div>
+  <div class="rounded-lg border shadow-sm">
+    <div class="p-4">
+      {usuarios.length === 0 ? (
+        <div class="text-center py-8">
+          <p class="text-muted-foreground">No hay usuarios disponibles. Cree su primer usuario.</p>
+        </div>
+      ) : (
+        <div class="relative w-full overflow-auto">
+          <table class="w-full caption-bottom text-sm">
+            <thead class="[&_tr]:border-b">
+              <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">ID</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Nombre</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Email</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Tipo</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Empresa</th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="usuariosTableBody" class="[&_tr:last-child]:border-0">
+              {usuarios.map((usuario) => (
+                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted usuario-row" data-id={usuario.id.toString()}>
+                  <td class="p-4 align-middle">{usuario.id}</td>
+                  <td class="p-4 align-middle">{usuario.nombre}</td>
+                  <td class="p-4 align-middle">{usuario.email}</td>
+                  <td class="p-4 align-middle">{usuario.tipo}</td>
+                  <td class="p-4 align-middle">{usuario.empresa || '-'}</td>
+                  <td class="p-4 align-middle">
+                    <div class="flex gap-2">
+                      <a 
+                        href={`/admin/editar-usuario/${usuario.id}`}
+                        class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        Editar
+                      </a>
+                      <button 
+                        type="button"
+                        class="eliminar-usuario inline-flex h-9 items-center justify-center rounded-md bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground shadow-sm hover:bg-destructive/90"
+                        data-id={usuario.id.toString()}
+                        data-nombre={usuario.nombre}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+</AdminLayout>
+
+<script>
+  import Swal from "sweetalert2";
+
+  // Cargar estilos de SweetAlert2 inmediatamente
+  (function() {
+    if (!document.querySelector('link[href*="sweetalert2.min.css"]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css';
+      document.head.appendChild(link);
+      console.log("Estilos de SweetAlert2 cargados inmediatamente.");
+    }
+  })();
+
+  // Definir interfaces para TypeScript
+  interface DeleteButton extends HTMLButtonElement {
+    getAttribute(name: string): string | null;
+    closest<E extends Element = Element>(selector: string): E | null;
+  }
+
+  // Función para eliminar un usuario
+  function eliminarUsuario(id: string, fila: HTMLTableRowElement | null): void {
+    Swal.fire({
+      title: 'Eliminando...',
+      text: 'Por favor espere',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    
+    fetch('/api/eliminar-usuario', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: id }),
+    })
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data: { success: boolean, error?: string }) {
+      if (data.success) {
+        if (fila) {
+          fila.remove();
+        }
+        Swal.fire({
+          title: '¡Eliminado!',
+          text: 'El usuario ha sido eliminado correctamente.',
+          icon: 'success',
+          confirmButtonColor: '#3085d6'
+        });
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: data.error || 'No se pudo eliminar el usuario',
+          icon: 'error',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    })
+    .catch(function(error) {
+      console.error('Error al eliminar el usuario:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Error al eliminar el usuario. Por favor, inténtelo de nuevo.',
+        icon: 'error',
+        confirmButtonColor: '#3085d6'
+      });
+    });
+  }
+
+  // Función para configurar botones de eliminar
+  function setupDeleteButtons(): void {
+    console.log("Configurando botones de eliminar para usuarios...");
+    
+    const deleteButtons = document.querySelectorAll<DeleteButton>('.eliminar-usuario');
+    
+    deleteButtons.forEach(function(boton) {
+      const id = boton.getAttribute('data-id');
+      const nombre = boton.getAttribute('data-nombre');
+
+      if (!id || !nombre) {
+        console.error('Faltan atributos de datos en el botón');
+        return;
+      }
+
+      boton.addEventListener('click', function() {
+        Swal.fire({
+          title: '¿Está seguro?',
+          text: `¿Desea eliminar el usuario "${nombre}"?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            const fila = this.closest('tr');
+            eliminarUsuario(id, fila);
+          }
+        });
+      });
+    });
+  }
+
+  // Función para inicializar todo
+  function initializePage(): void {
+    console.log("Inicializando página de usuarios...");
+    setupDeleteButtons();
+  }
+
+  // Ejecutar en DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOMContentLoaded disparado");
+    initializePage();
+  });
+
+  // Ejecutar también en el evento astro:page-load para View Transitions
+  document.addEventListener('astro:page-load', function() {
+    console.log("astro:page-load disparado");
+    initializePage();
+  });
+
+  // Ejecutar inmediatamente
+  console.log("Ejecutando inicialización inmediata");
+  initializePage();
+</script>
