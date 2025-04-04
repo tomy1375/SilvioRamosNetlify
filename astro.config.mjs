@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import react from '@astrojs/react';
 import vercel from '@astrojs/vercel/serverless';
+import netlify from '@astrojs/netlify';
 // https://astro.build/config
 export default defineConfig({
   integrations: [
@@ -12,8 +13,5 @@ export default defineConfig({
     react()
   ],
   output: 'server',
-  adapter: vercel({
-    // Opciones del adaptador (opcional)
-    // analytics: true,
-  }),
+  adapter: netlify(),
 });
