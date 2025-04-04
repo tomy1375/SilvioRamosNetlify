@@ -1,11 +1,24 @@
 import pkg from "pg"
 const { Pool } = pkg
 
+// Función para obtener variables de entorno que funciona en desarrollo y producción
+function getEnv(name) {
+  // En desarrollo (Astro local)
+  if (import.meta && import.meta.env) {
+    return import.meta.env[name]
+  }
+  // En producción (Vercel)
+  if (process && process.env) {
+    return process.env[name]
+  }
+  return undefined
+}
+
 // Función para validar las variables de entorno
 function validateEnvVars() {
   const requiredVars = ["DB_USER", "DB_HOST", "DB_NAME", "DB_PASSWORD", "DB_PORT"]
 
-  const missing = requiredVars.filter((varName) => !import.meta.env[varName])
+  const missing = requiredVars.filter((varName) => !getEnv(varName))
 
   if (missing.length > 0) {
     console.error(`Faltan variables de entorno requeridas: ${missing.join(", ")}`)
@@ -17,12 +30,12 @@ function validateEnvVars() {
 
 // Configuración de la conexión a PostgreSQL
 const pool = new Pool({
-  user: import.meta.env.DB_USER || "",
-  host: import.meta.env.DB_HOST || "",
-  database: import.meta.env.DB_NAME || "",
-  password: String(import.meta.env.DB_PASSWORD || ""), // Convertir explícitamente a string
-  port: Number.parseInt(import.meta.env.DB_PORT || "5432"),
-  ssl: import.meta.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+  user: getEnv("DB_USER") || "",
+  host: getEnv("DB_HOST") || "",
+  database: getEnv("DB_NAME") || "",
+  password: String(getEnv("DB_PASSWORD") || ""), // Convertir explícitamente a string
+  port: Number.parseInt(getEnv("DB_PORT") || "5432"),
+  ssl: getEnv("NODE_ENV") === "production" ? { rejectUnauthorized: false } : false,
 })
 
 // Función para ejecutar consultas SQL
