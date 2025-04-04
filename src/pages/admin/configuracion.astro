@@ -3,275 +3,287 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
 <AdminLayout title="Configuración" activeLink="configuracion">
-  <div class="flex flex-col gap-6">
-    <div class="flex flex-col gap-2">
-      <h1 class="text-2xl font-bold tracking-tight">Configuración</h1>
-      <p class="text-muted-foreground">
-        Configure los ajustes de la aplicación y su cuenta.
-      </p>
-    </div>
-    
-    <!-- Configuración de la cuenta -->
-    <div class="rounded-lg border shadow-sm">
-      <div class="p-6">
-        <h2 class="text-xl font-semibold mb-4">Configuración de la Cuenta</h2>
-        
-        <form id="cambiarPasswordForm" class="space-y-4">
-          <div class="space-y-2">
-            <label for="currentPassword" class="text-sm font-medium leading-none">Contraseña Actual</label>
-            <input 
-              type="password" 
-              id="currentPassword" 
-              name="currentPassword" 
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              required
-            />
-          </div>
-          
-          <div class="space-y-2">
-            <label for="newPassword" class="text-sm font-medium leading-none">Nueva Contraseña</label>
-            <input 
-              type="password" 
-              id="newPassword" 
-              name="newPassword" 
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              required
-            />
-          </div>
-          
-          <div class="space-y-2">
-            <label for="confirmPassword" class="text-sm font-medium leading-none">Confirmar Nueva Contraseña</label>
-            <input 
-              type="password" 
-              id="confirmPassword" 
-              name="confirmPassword" 
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              required
-            />
-          </div>
-          
-          <div>
-            <button 
-              type="submit" 
-              class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            >
-              Cambiar Contraseña
-            </button>
-          </div>
-          
-          <div id="passwordResult" class="mt-2"></div>
-        </form>
-      </div>
-    </div>
-    
-    <!-- Configuración de notificaciones -->
-    <div class="rounded-lg border shadow-sm">
-      <div class="p-6">
-        <h2 class="text-xl font-semibold mb-4">Preferencias de Notificaciones</h2>
-        
-        <div class="space-y-4">
-          <div class="flex items-center space-x-2">
-            <input type="checkbox" id="emailNotifications" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" checked />
-            <label for="emailNotifications" class="text-sm font-medium leading-none">Recibir notificaciones por correo electrónico</label>
-          </div>
-          
-          <div class="flex items-center space-x-2">
-            <input type="checkbox" id="newPlanosNotifications" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" checked />
-            <label for="newPlanosNotifications" class="text-sm font-medium leading-none">Notificar cuando se suban nuevos planos</label>
-          </div>
-          
-          <div class="flex items-center space-x-2">
-            <input type="checkbox" id="downloadNotifications" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" checked />
-            <label for="downloadNotifications" class="text-sm font-medium leading-none">Notificar cuando un cliente descargue un plano</label>
-          </div>
-          
-          <div>
-            <button 
-              id="saveNotificationsBtn"
-              class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            >
-              Guardar Preferencias
-            </button>
-          </div>
-          
-          <div id="notificationsResult" class="mt-2"></div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Configuración del sistema -->
-    <div class="rounded-lg border shadow-sm">
-      <div class="p-6">
-        <h2 class="text-xl font-semibold mb-4">Configuración del Sistema</h2>
-        
-        <div id="env-status" class="space-y-4 mb-6">
-          <p>Cargando información de variables de entorno...</p>
-        </div>
-        
-        <div class="space-y-4">
-          <h3 class="text-lg font-medium">Base de Datos</h3>
-          <div class="flex space-x-4">
-            <button 
-              id="setup-db-btn"
-              class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            >
-              Configurar Base de Datos
-            </button>
-            
-            <button 
-              id="backup-db-btn"
-              class="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            >
-              Crear Respaldo
-            </button>
-          </div>
-          <div id="setup-result" class="mt-2"></div>
-        </div>
-      </div>
-    </div>
-  </div>
+ <div class="flex flex-col gap-6">
+   <div class="flex flex-col gap-2">
+     <h1 class="text-2xl font-bold tracking-tight">Configuración</h1>
+     <p class="text-muted-foreground">
+       Configure los ajustes de la aplicación y su cuenta.
+     </p>
+   </div>
+   
+   <!-- Configuración de la cuenta -->
+   <div class="rounded-lg border shadow-sm">
+     <div class="p-6">
+       <h2 class="text-xl font-semibold mb-4">Configuración de la Cuenta</h2>
+       
+       <form id="cambiarPasswordForm" class="space-y-4">
+         <div class="space-y-2">
+           <label for="currentPassword" class="text-sm font-medium leading-none">Contraseña Actual</label>
+           <input 
+             type="password" 
+             id="currentPassword" 
+             name="currentPassword" 
+             class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+             required
+           />
+         </div>
+         
+         <div class="space-y-2">
+           <label for="newPassword" class="text-sm font-medium leading-none">Nueva Contraseña</label>
+           <input 
+             type="password" 
+             id="newPassword" 
+             name="newPassword" 
+             class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+             required
+           />
+         </div>
+         
+         <div class="space-y-2">
+           <label for="confirmPassword" class="text-sm font-medium leading-none">Confirmar Nueva Contraseña</label>
+           <input 
+             type="password" 
+             id="confirmPassword" 
+             name="confirmPassword" 
+             class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+             required
+           />
+         </div>
+         
+         <div>
+           <button 
+             type="submit" 
+             class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+           >
+             Cambiar Contraseña
+           </button>
+         </div>
+         
+         <div id="passwordResult" class="mt-2"></div>
+       </form>
+     </div>
+   </div>
+   
+   <!-- Configuración de notificaciones -->
+   <div class="rounded-lg border shadow-sm">
+     <div class="p-6">
+       <h2 class="text-xl font-semibold mb-4">Preferencias de Notificaciones</h2>
+       
+       <div class="space-y-4">
+         <div class="flex items-center space-x-2">
+           <input type="checkbox" id="emailNotifications" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" checked />
+           <label for="emailNotifications" class="text-sm font-medium leading-none">Recibir notificaciones por correo electrónico</label>
+         </div>
+         
+         <div class="flex items-center space-x-2">
+           <input type="checkbox" id="newPlanosNotifications" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" checked />
+           <label for="newPlanosNotifications" class="text-sm font-medium leading-none">Notificar cuando se suban nuevos planos</label>
+         </div>
+         
+         <div class="flex items-center space-x-2">
+           <input type="checkbox" id="downloadNotifications" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" checked />
+           <label for="downloadNotifications" class="text-sm font-medium leading-none">Notificar cuando un cliente descargue un plano</label>
+         </div>
+         
+         <div>
+           <button 
+             id="saveNotificationsBtn"
+             class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+           >
+             Guardar Preferencias
+           </button>
+         </div>
+         
+         <div id="notificationsResult" class="mt-2"></div>
+       </div>
+     </div>
+   </div>
+   
+   <!-- Configuración del sistema -->
+   <div class="rounded-lg border shadow-sm">
+     <div class="p-6">
+       <h2 class="text-xl font-semibold mb-4">Configuración del Sistema</h2>
+       
+       <div id="env-status" class="space-y-4 mb-6">
+         <p>Cargando información de variables de entorno...</p>
+       </div>
+       
+       <div class="space-y-4">
+         <h3 class="text-lg font-medium">Base de Datos</h3>
+         <div class="flex space-x-4">
+           <button 
+             id="setup-db-btn"
+             class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+           >
+             Configurar Base de Datos
+           </button>
+           
+           <button 
+             id="backup-db-btn"
+             class="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+           >
+             Crear Respaldo
+           </button>
+         </div>
+         <div id="setup-result" class="mt-2"></div>
+       </div>
+     </div>
+   </div>
+ </div>
 </AdminLayout>
 
 <script>
-  // Función para verificar las variables de entorno
-  async function checkEnv() {
-    try {
-      const response = await fetch('/api/check-env');
-      const data = await response.json();
-      
-      const envStatusDiv = document.getElementById('env-status');
-      if (envStatusDiv) {
-        let html = '<ul class="space-y-2">';
-        
-        for (const [key, value] of Object.entries(data.envStatus)) {
-          const status = value === "Configurado" 
-            ? '<span class="text-green-600">✓ Configurado</span>' 
-            : '<span class="text-red-600">✗ No configurado</span>';
-          
-          html += `<li><strong>${key}:</strong> ${status}</li>`;
-        }
-        
-        html += '</ul>';
-        envStatusDiv.innerHTML = html;
-      }
-    } catch (error) {
-      console.error('Error al verificar variables de entorno:', error);
-      const envStatusDiv = document.getElementById('env-status');
-      if (envStatusDiv) {
-        envStatusDiv.innerHTML = '<p class="text-red-600">Error al verificar variables de entorno</p>';
-      }
-    }
-  }
-  
-  // Función para configurar la base de datos
-  async function setupDB() {
-    try {
-      const setupBtn = document.getElementById('setup-db-btn');
-      const setupResult = document.getElementById('setup-result');
-      
-      if (setupBtn) {
-        setupBtn.disabled = true;
-        setupBtn.innerHTML = 'Configurando...';
-      }
-      
-      const response = await fetch('/api/setup-db');
-      const data = await response.json();
-      
-      if (setupResult) {
-        if (data.success) {
-          setupResult.innerHTML = '<p class="text-green-600">Base de datos configurada correctamente</p>';
-        } else {
-          setupResult.innerHTML = `<p class="text-red-600">Error: ${data.error || 'Ocurrió un error desconocido'}</p>`;
-          if (data.details) {
-            setupResult.innerHTML += `<p class="text-sm text-muted-foreground">${data.details}</p>`;
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error al configurar la base de datos:', error);
-      const setupResult = document.getElementById('setup-result');
-      if (setupResult) {
-        setupResult.innerHTML = '<p class="text-red-600">Error al configurar la base de datos</p>';
-      }
-    } finally {
-      const setupBtn = document.getElementById('setup-db-btn');
-      if (setupBtn) {
-        setupBtn.disabled = false;
-        setupBtn.innerHTML = 'Configurar Base de Datos';
-      }
-    }
-  }
-  
-  // Función para manejar el cambio de contraseña
-  function handlePasswordChange(e) {
-    e.preventDefault();
-    
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    const passwordResult = document.getElementById('passwordResult');
-    
-    // Validar que las contraseñas coincidan
-    if (newPassword !== confirmPassword) {
-      passwordResult.innerHTML = '<p class="text-red-600">Las contraseñas no coinciden</p>';
-      return;
-    }
-    
-    // Aquí iría la lógica para cambiar la contraseña
-    // Por ahora, solo mostramos un mensaje de éxito simulado
-    passwordResult.innerHTML = '<p class="text-green-600">Contraseña cambiada correctamente</p>';
-    
-    // Limpiar el formulario
-    document.getElementById('cambiarPasswordForm').reset();
-  }
-  
-  // Función para guardar preferencias de notificaciones
-  function saveNotifications() {
-    const emailNotifications = document.getElementById('emailNotifications').checked;
-    const newPlanosNotifications = document.getElementById('newPlanosNotifications').checked;
-    const downloadNotifications = document.getElementById('downloadNotifications').checked;
-    const notificationsResult = document.getElementById('notificationsResult');
-    
-    // Aquí iría la lógica para guardar las preferencias
-    // Por ahora, solo mostramos un mensaje de éxito simulado
-    notificationsResult.innerHTML = '<p class="text-green-600">Preferencias guardadas correctamente</p>';
-    
-    // Ocultar el mensaje después de 3 segundos
-    setTimeout(() => {
-      notificationsResult.innerHTML = '';
-    }, 3000);
-  }
-  
-  // Ejecutar cuando el DOM esté cargado
-  document.addEventListener('DOMContentLoaded', () => {
-    // Verificar variables de entorno
-    checkEnv();
-    
-    // Agregar evento al botón de configurar base de datos
-    const setupBtn = document.getElementById('setup-db-btn');
-    if (setupBtn) {
-      setupBtn.addEventListener('click', setupDB);
-    }
-    
-    // Agregar evento al formulario de cambio de contraseña
-    const passwordForm = document.getElementById('cambiarPasswordForm');
-    if (passwordForm) {
-      passwordForm.addEventListener('submit', handlePasswordChange);
-    }
-    
-    // Agregar evento al botón de guardar preferencias de notificaciones
-    const saveNotificationsBtn = document.getElementById('saveNotificationsBtn');
-    if (saveNotificationsBtn) {
-      saveNotificationsBtn.addEventListener('click', saveNotifications);
-    }
-    
-    // Agregar evento al botón de respaldo de base de datos
-    const backupBtn = document.getElementById('backup-db-btn');
-    if (backupBtn) {
-      backupBtn.addEventListener('click', () => {
-        alert('Funcionalidad de respaldo no implementada aún');
-      });
-    }
-  });
+ // Función para verificar las variables de entorno
+ async function checkEnv() {
+   try {
+     const response = await fetch('/api/check-env');
+     const data = await response.json();
+     
+     const envStatusDiv = document.getElementById('env-status');
+     if (envStatusDiv) {
+       let html = '<ul class="space-y-2">';
+       
+       for (const [key, value] of Object.entries(data.envStatus)) {
+         const status = value === "Configurado" 
+           ? '<span class="text-green-600">✓ Configurado</span>' 
+           : '<span class="text-red-600">✗ No configurado</span>';
+         
+         html += `<li><strong>${key}:</strong> ${status}</li>`;
+       }
+       
+       html += '</ul>';
+       envStatusDiv.innerHTML = html;
+     }
+   } catch (error) {
+     console.error('Error al verificar variables de entorno:', error);
+     const envStatusDiv = document.getElementById('env-status');
+     if (envStatusDiv) {
+       envStatusDiv.innerHTML = '<p class="text-red-600">Error al verificar variables de entorno</p>';
+     }
+   }
+ }
+ 
+ // Función para configurar la base de datos
+ async function setupDB() {
+   try {
+     const setupBtn = document.getElementById('setup-db-btn') as HTMLButtonElement;
+     const setupResult = document.getElementById('setup-result');
+     
+     if (setupBtn) {
+       setupBtn.disabled = true;
+       setupBtn.innerHTML = 'Configurando...';
+     }
+     
+     const response = await fetch('/api/setup-db');
+     const data = await response.json();
+     
+     if (setupResult) {
+       if (data.success) {
+         setupResult.innerHTML = '<p class="text-green-600">Base de datos configurada correctamente</p>';
+       } else {
+         setupResult.innerHTML = `<p class="text-red-600">Error: ${data.error || 'Ocurrió un error desconocido'}</p>`;
+         if (data.details) {
+           setupResult.innerHTML += `<p class="text-sm text-muted-foreground">${data.details}</p>`;
+         }
+       }
+     }
+   } catch (error) {
+     console.error('Error al configurar la base de datos:', error);
+     const setupResult = document.getElementById('setup-result');
+     if (setupResult) {
+       setupResult.innerHTML = '<p class="text-red-600">Error al configurar la base de datos</p>';
+     }
+   } finally {
+     const setupBtn = document.getElementById('setup-db-btn') as HTMLButtonElement;
+     if (setupBtn) {
+       setupBtn.disabled = false;
+       setupBtn.innerHTML = 'Configurar Base de Datos';
+     }
+   }
+ }
+ 
+ // Función para manejar el cambio de contraseña
+ function handlePasswordChange(e: Event) {
+   e.preventDefault();
+   
+   const currentPassword = (document.getElementById('currentPassword') as HTMLInputElement).value;
+   const newPassword = (document.getElementById('newPassword') as HTMLInputElement).value;
+   const confirmPassword = (document.getElementById('confirmPassword') as HTMLInputElement).value;
+   const passwordResult = document.getElementById('passwordResult');
+   
+   // Validar que las contraseñas coincidan
+   if (newPassword !== confirmPassword) {
+     if (passwordResult) {
+       passwordResult.innerHTML = '<p class="text-red-600">Las contraseñas no coinciden</p>';
+     }
+     return;
+   }
+   
+   // Aquí iría la lógica para cambiar la contraseña
+   // Por ahora, solo mostramos un mensaje de éxito simulado
+   if (passwordResult) {
+     passwordResult.innerHTML = '<p class="text-green-600">Contraseña cambiada correctamente</p>';
+   }
+   
+   // Limpiar el formulario
+   const form = document.getElementById('cambiarPasswordForm') as HTMLFormElement;
+   if (form) {
+     form.reset();
+   }
+ }
+ 
+ // Función para guardar preferencias de notificaciones
+ function saveNotifications() {
+   const emailNotifications = (document.getElementById('emailNotifications') as HTMLInputElement).checked;
+   const newPlanosNotifications = (document.getElementById('newPlanosNotifications') as HTMLInputElement).checked;
+   const downloadNotifications = (document.getElementById('downloadNotifications') as HTMLInputElement).checked;
+   const notificationsResult = document.getElementById('notificationsResult');
+   
+   // Aquí iría la lógica para guardar las preferencias
+   // Por ahora, solo mostramos un mensaje de éxito simulado
+   if (notificationsResult) {
+     notificationsResult.innerHTML = '<p class="text-green-600">Preferencias guardadas correctamente</p>';
+   
+     // Ocultar el mensaje después de 3 segundos
+     setTimeout(() => {
+       if (notificationsResult) {
+         notificationsResult.innerHTML = '';
+       }
+     }, 3000);
+   }
+ }
+ 
+ // Ejecutar cuando el DOM esté cargado
+ document.addEventListener('DOMContentLoaded', () => {
+   // Verificar variables de entorno
+   checkEnv();
+   
+   // Agregar evento al botón de configurar base de datos
+   const setupBtn = document.getElementById('setup-db-btn');
+   if (setupBtn) {
+     setupBtn.addEventListener('click', setupDB);
+   }
+   
+   // Agregar evento al formulario de cambio de contraseña
+   const passwordForm = document.getElementById('cambiarPasswordForm');
+   if (passwordForm) {
+     passwordForm.addEventListener('submit', handlePasswordChange);
+   }
+   
+   // Agregar evento al botón de guardar preferencias de notificaciones
+   const saveNotificationsBtn = document.getElementById('saveNotificationsBtn');
+   if (saveNotificationsBtn) {
+     saveNotificationsBtn.addEventListener('click', saveNotifications);
+   }
+   
+   // Agregar evento al botón de respaldo de base de datos
+   const backupBtn = document.getElementById('backup-db-btn');
+   if (backupBtn) {
+     backupBtn.addEventListener('click', () => {
+       alert('Funcionalidad de respaldo no implementada aún');
+     });
+   }
+ });
 </script>
+
 
